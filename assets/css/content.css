@@ -1,0 +1,8 @@
+.content-container {
+  flex: 1 0 auto;
+}
+
+#content {
+  padding: 0 1em;
+  margin: 0 auto;
+}

@@ -1,0 +1,16 @@
+.archive {
+  margin: 1em 0;
+}
+
+@media(min-width: 64em) {
+  .archive {
+    float: right;
+    width: calc(100% - 200px);
+    padding-right: 200px;
+  }
+}
+
+.page-title {
+  margin-top: 0;
+  line-height: 1;
+}

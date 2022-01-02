@@ -1,0 +1,18 @@
+{%- comment -%} head information, includes basic meta, style and script {%- endcomment -%}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>
+  {% if page.title %}
+    {{ page.title | append: ' - ' | append: site.data.l10n.title | escape }}
+  {% else %}
+    {{ site.data.l10n.title | escape }}
+  {% endif %}
+</title>
+
+<!-- style all pages needs -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<script src="/assets/js/utils.js"></script>
+<script src="/assets/js/jquery-3.6.0.min.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
