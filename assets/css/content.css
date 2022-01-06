@@ -1,8 +1,31 @@
 .content-container {
   flex: 1 0 auto;
+  position: relative;
 }
 
 #content {
   padding: 0 1em;
   margin: 0 auto;
 }
+
+.back-to-top-wrapper {
+  position: absolute;
+  top: 100vh;
+  bottom: 0em;
+  right: 3em;
+  pointer-events: none;
+}
+
+.back-to-top-link {
+  /* `fixed` is fallback when `sticky` not supported */
+  position: fixed;
+  position: sticky;
+  pointer-events: all;
+  top: calc(100vh - 5rem);
+
+  display: inline-block;
+  text-decoration: none;
+  font-size: 2rem;
+  text-align: center;
+}
+

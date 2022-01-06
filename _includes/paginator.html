@@ -1,0 +1,21 @@
+{% comment %}
+Should assign posts before include this component
+{% endcomment %}
+<div class="pagination">
+  {% assign post_nums=posts.size %}
+  {% for post in posts %}
+    <div class="post-item">
+      <article class="archive-item">
+        <h2 class="archive-item-title">
+          {% if post.link %}
+            <a href="{{ post.link }}">{{ post.title }}</a> <a href="{{ post.url | relative_url }}" rel="permalink">Permalink</a>
+          {% else %}
+            <a href="{{ post.url | relative_url }}" rel="permalink">{{ post.title }}</a>
+          {% endif %}
+        </h2>
+        {% include post-meta.html %}
+        {% if post.excerpt %}<p class="archive-item-excerpt" itemprop="description">{{ post.excerpt | markdownify | strip_html | truncate: 160 }}</p>{% endif %}
+      </article>
+    </div>
+  {% endfor %}
+</div>

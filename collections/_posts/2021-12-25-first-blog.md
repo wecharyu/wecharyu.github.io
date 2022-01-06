@@ -3,27 +3,10 @@ title: "First blog"
 toc: true
 layout: post
 categories: 教程
-tags:
-  - tag1
-  - tag2
-  - tag3
-  - tag4
-  - tag5
-  - tag6
-  - tag7
-  - tag8
-  - tag9
-  - tag10
-  - tag11
-  - tag12
-  - tag13
-  - tag14
-  - tag15
-  - tag16
-  - tag17
+tags: tag1
 ---
 
-hehe
+It's a simply excerpt, used to do the test for my first blog in build the whole blog site. Hopefully it will help me a lot. So I can finished it finally.
 
 ## What's your problem
 

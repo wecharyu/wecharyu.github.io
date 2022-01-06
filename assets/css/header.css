@@ -83,9 +83,16 @@ nav ul {
   left: 25%;
   width: 50%;
   margin: 0 auto;
+  background-color: #f2f2f2;
   border: 2px solid rgb(33, 150, 243);
   border-radius: 10px;
-  padding: 0 1em;
+  padding: 0 0.25em;
+}
+@media (max-width: 64em) {
+  .greedy-nav #search-bar {
+    left: 10%;
+    width: 80%;
+  }
 }
 
 .drop-down {
@@ -101,7 +108,7 @@ nav ul {
   border: none;
   padding: 0;
   float: left;
-  font-size: 16px;
+  font-size: 1em;
   font-weight: 300;
   outline: 0;
 }
@@ -132,4 +139,30 @@ nav ul {
 
 .site-title {
   font-weight: bold;
+}
+
+#search-results {
+  margin-left: 1.5em;
+}
+
+#search-results p {
+  color: #000;
+  margin: 0;
+}
+#search-results li {
+  list-style: disc;
+  display: list-item;
+}
+
+#search-results li::marker {
+  color: #000;
+}
+
+.search-results-item {
+  font-size: 0.875em;
+}
+
+.search-results-item a {
+  color: rgb(33, 150, 243);
+  margin: 0;
 }

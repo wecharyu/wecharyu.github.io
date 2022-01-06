@@ -1,0 +1,53 @@
+{% assign document = post | default: page %}
+
+{% assign verbose = include.verbose %}
+<p class="post-meta">
+  <!-- post create time -->
+  <span>
+    <svg class="icon" viewBox="0 0 36 36" version="1.1"  preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <title>create-date</title>
+        <path class="clr-i-outline clr-i-outline-path-1" d="M32.25,6H29V8h3V30H4V8H7V6H3.75A1.78,1.78,0,0,0,2,7.81V30.19A1.78,1.78,0,0,0,3.75,32h28.5A1.78,1.78,0,0,0,34,30.19V7.81A1.78,1.78,0,0,0,32.25,6Z"></path><rect class="clr-i-outline clr-i-outline-path-2" x="8" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-3" x="14" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-4" x="20" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-5" x="26" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-6" x="8" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-7" x="14" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-8" x="20" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-9" x="26" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-10" x="8" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-11" x="14" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-12" x="20" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-13" x="26" y="24" width="2" height="2"></rect><path class="clr-i-outline clr-i-outline-path-14" d="M10,10a1,1,0,0,0,1-1V3A1,1,0,0,0,9,3V9A1,1,0,0,0,10,10Z"></path><path class="clr-i-outline clr-i-outline-path-15" d="M26,10a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V9A1,1,0,0,0,26,10Z"></path><rect class="clr-i-outline clr-i-outline-path-16" x="13" y="6" width="10" height="2"></rect>
+        <rect x="0" y="0" width="36" height="36" fill-opacity="0"/>
+    </svg>
+    {% assign date_format = site.data.l10n.date_format | default: "%B %-d, %Y" %}
+    <time datetime="{{ page.date | date_to_xmlschema }}">{{ document.date | date: date_format }}</time>
+  </span>
+  {% if verbose %}
+  <!-- post views counts -->
+  <span class="span-divider"></span>
+  <span>
+    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 83.78" style="enable-background:new 0 0 122.88 83.78" xml:space="preserve">
+      <g>
+        <title>views</title>
+        <path d="M95.73,10.81c10.53,7.09,19.6,17.37,26.48,29.86l0.67,1.22l-0.67,1.21c-6.88,12.49-15.96,22.77-26.48,29.86 C85.46,79.88,73.8,83.78,61.44,83.78c-12.36,0-24.02-3.9-34.28-10.81C16.62,65.87,7.55,55.59,0.67,43.1L0,41.89l0.67-1.22 c6.88-12.49,15.95-22.77,26.48-29.86C37.42,3.9,49.08,0,61.44,0C73.8,0,85.45,3.9,95.73,10.81L95.73,10.81z M60.79,22.17l4.08,0.39 c-1.45,2.18-2.31,4.82-2.31,7.67c0,7.48,5.86,13.54,13.1,13.54c2.32,0,4.5-0.62,6.39-1.72c0.03,0.47,0.05,0.94,0.05,1.42 c0,11.77-9.54,21.31-21.31,21.31c-11.77,0-21.31-9.54-21.31-21.31C39.48,31.71,49.02,22.17,60.79,22.17L60.79,22.17L60.79,22.17z M109,41.89c-5.5-9.66-12.61-17.6-20.79-23.11c-8.05-5.42-17.15-8.48-26.77-8.48c-9.61,0-18.71,3.06-26.76,8.48 c-8.18,5.51-15.29,13.45-20.8,23.11c5.5,9.66,12.62,17.6,20.8,23.1c8.05,5.42,17.15,8.48,26.76,8.48c9.62,0,18.71-3.06,26.77-8.48 C96.39,59.49,103.5,51.55,109,41.89L109,41.89z"/>
+      </g>
+    </svg>
+    <span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span></span>
+  </span>
+  <span class="span-divider"></span>
+  <span>
+    <svg version="1.1" class="icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      viewBox="0 0 238.75 238.75" style="enable-background:new 0 0 238.75 238.75;" xml:space="preserve">
+    <g>
+      <title>read-minuts</title>
+      <path d="M156.619,138.47h-33.965v-37.31c0-4.142-3.357-7.5-7.5-7.5c-4.143,0-7.5,3.358-7.5,7.5v44.81c0,4.142,3.357,7.5,7.5,7.5
+        h41.465c4.143,0,7.5-3.358,7.5-7.5C164.119,141.828,160.762,138.47,156.619,138.47z"/>
+      <path d="M191.889,80.546l4.959-4.963l2.379,2.38c1.465,1.466,3.385,2.198,5.305,2.198c1.919,0,3.838-0.732,5.302-2.195
+        c2.93-2.928,2.932-7.677,0.003-10.606l-7.521-7.525c-0.054-0.058-0.102-0.119-0.158-0.175c-0.055-0.055-0.114-0.101-0.171-0.154
+        l-7.5-7.505c-2.93-2.931-7.678-2.931-10.606-0.003c-2.93,2.928-2.932,7.677-0.003,10.606l2.367,2.369l-5.007,5.011
+        c-10.723-9.099-23.466-15.884-37.453-19.574c4.2-5.306,6.718-12.003,6.718-19.281C150.502,13.964,136.541,0,119.381,0
+        c-17.167,0-31.133,13.964-31.133,31.129c0,7.279,2.519,13.977,6.722,19.283C53.958,61.232,23.629,98.64,23.629,143.001
+        c0,52.796,42.954,95.749,95.752,95.749c52.791,0,95.74-42.953,95.74-95.749C215.121,119.158,206.359,97.324,191.889,80.546z
+        M103.248,31.129c0-8.894,7.237-16.129,16.133-16.129c8.89,0,16.121,7.235,16.121,16.129c0,8.891-7.232,16.125-16.121,16.125
+        C110.485,47.254,103.248,40.02,103.248,31.129z M119.381,223.75c-44.526,0-80.752-36.224-80.752-80.749
+        c0-44.524,36.226-80.747,80.752-80.747c44.521,0,80.74,36.223,80.74,80.747C200.121,187.526,163.901,223.75,119.381,223.75z"/>
+      <path d="M119.381,73.184c-37.315,0-67.674,30.357-67.674,67.671c0,37.312,30.358,67.668,67.674,67.668
+        c37.309,0,67.662-30.356,67.662-67.668C187.043,103.54,156.689,73.184,119.381,73.184z M119.381,193.523
+        c-29.045,0-52.674-23.627-52.674-52.668c0-29.043,23.629-52.671,52.674-52.671c29.038,0,52.662,23.628,52.662,52.671
+        C172.043,169.895,148.419,193.523,119.381,193.523z"/>
+    </g>
+    </svg>
+    <span id="read-minutes"></span>
+  </span>
+  {% endif %}
+</p>

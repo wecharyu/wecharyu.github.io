@@ -1,15 +1,15 @@
-.tag-cloud {
+.word-cloud {
   text-align: center;
   margin: 0 auto;
   padding: 0;
   list-style: none;
 }
 
-.tag-cloud li {
+.word-cloud li {
   display: inline-block;
 }
 
-.tag-cloud a {
+.word-cloud a {
   display: inline-block;
   margin: 0.5em;
 }
