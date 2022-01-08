@@ -2,7 +2,8 @@
 title: "First blog"
 toc: true
 layout: post
-categories: 教程
+lang: en
+categories: Tutorial
 tags: tag1
 ---
 

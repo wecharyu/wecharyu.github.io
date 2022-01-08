@@ -1,8 +1,7 @@
 ---
-title: "Home"
+title: "breadcrumb_home_label"
 layout: archive
 permalink: /
-lang: en
 ---
 
 <link rel="stylesheet" href="/assets/css/paginator.css">
@@ -10,5 +9,5 @@ lang: en
 <link rel="stylesheet" href="/assets/css/home.css">
 
 <h2 class='archive-subtitle'>{{ site.data.ui-text[site.active_lang].recent_posts | default: "Recent Posts" }}</h2>
-{% assign posts = site.posts %}
+{% assign posts = site.posts | where: "lang", site.active_lang %}
 {% include paginator.html %}

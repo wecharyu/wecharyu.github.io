@@ -7,6 +7,11 @@ layout: page
 <script src="/assets/js/post.js"></script>
 
 <article class="post">
+  {% if page.lang != site.active_lang %}
+  <div class="notice-warning" id="no-translation-msg">
+    {{ site.data.l10n.no_translation }}
+  </div>
+  {%- endif -%}
   {% if page.title %}<meta itemprop="headline" content="{{ page.title | markdownify | strip_html | strip_newlines | escape_once }}">{% endif %}
   {% if page.excerpt %}<meta itemprop="description" content="{{ page.excerpt | markdownify | strip_html | strip_newlines | escape_once }}">{% endif %}
   {% if page.date %}<meta itemprop="datePublished" content="{{ page.date | date_to_xmlschema }}">{% endif %}
@@ -79,7 +84,7 @@ layout: page
       {% endcase %}
       {% if site.category_archive.path %}
       {% assign categories_sorted = page.categories | sort_natural %}
-      <span class="page__taxonomy">
+      <span>
         <svg class="icon" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
           <title>Categories</title>
           <g id="Iconly/Bold/Category" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -89,11 +94,13 @@ layout: page
           </g>
         </svg>
         <strong>
-          {{ site.data.ui-text[site.active-lang].categories_label | default: "Categories:" }}
+          {{ site.data.ui-text[site.active_lang].categories_label | default: "Categories" }}
         </strong>
         <span>
         {% for category_word in categories_sorted %}
-          <a href="{{ category_word | slugify | prepend: path_type | prepend: site.category_archive.path | relative_url }}" rel="category">{{ category_word }}</a>{% unless forloop.last %}<span class="sep">, </span>{% endunless %}
+          {% capture category_url %}{{ category_word | slugify | prepend: path_type | prepend: site.category_archive.path }}{% endcapture %}
+          {% capture l10n_url %}{% if site.active_lang != site.default_lang %}{{ site.active_lang | prepend: "/" }}{% endif %}{{ category_url }}{% endcapture %}
+          <a href="{{ l10n_url | relative_url }}" rel="category">{{ category_word }}</a>{% unless forloop.last %}<span class="sep">, </span>{% endunless %}
         {% endfor %}
         </span>
       </span>
@@ -121,11 +128,13 @@ layout: page
           </g>
         </svg>
         <strong>
-          {{ site.data.ui-text[site.active-lang].tags_label | default: "Tags:" }}
+          {{ site.data.ui-text[site.active_lang].tags_label | default: "Tags" }}
         </strong>
         <span>
         {% for tag_word in tags_sorted %}
-          <a href="{{ tag_word | slugify | prepend: path_type | prepend: site.tag_archive.path | relative_url }}" rel="tag">{{ tag_word }}</a>{% unless forloop.last %}{% endunless %}
+          {% capture tag_url%}{{ tag_word | slugify | prepend: path_type | prepend: site.tag_archive.path }}{% endcapture %}
+          {% capture l10n_url %}{% if site.active_lang != site.default_lang %}{{ site.active_lang | prepend: "/" }}{% endif %}{{ tag_url }}{% endcapture %}
+          <a href="{{ l10n_url | relative_url }}" rel="tag">{{ tag_word }}</a>{% unless forloop.last %}{% endunless %}
         {% endfor %}
         </span>
       </span>

@@ -5,6 +5,8 @@ layout: page
 <link rel="stylesheet" href="/assets/css/archive.css">
 
 <div class="archive">
-  <h1 id="archive-title" class="archive-title">{{ page.title }}</h1>
+  {% assign archive-title-label = page.title %}
+  {% assign archive-title = site.data.ui-text[site.active_lang][archive-title-label] %}
+  <h1 id="archive-title" class="archive-title">{{ archive-title }}</h1>
   {{ content }}
 </div>

@@ -9,6 +9,7 @@ $(document).ready(() => {
   $("#nav-toggle").on('click', () => {
     $('#nav-toggle').toggleClass('open')
     $('#toggle-menu').toggleClass('hidden')
+    $('#toggle-menu').css('right', $(window).width() - $('#nav-toggle').offset().left - $('#nav-toggle').width())
   })
 
   $('#search-button').click(() => {
@@ -20,6 +21,12 @@ $(document).ready(() => {
       input.focus()
     }, 20);
     $('#search-bar').toggleClass('hidden')
+  })
+
+  $('#language-toggle-button').click(() => {
+    $('#language-toggle-button').toggleClass('open')
+    $('#language-options').toggleClass('hidden')
+    $('#language-options').css('right', $(window).width() - $('#language-toggle-button').offset().left - $('#language-toggle-button').width())
   })
 });
 
@@ -52,7 +59,6 @@ function checkHeaderWidth() {
 	if (!bar || !input || !resultList || !searchIndex) return;
 
   input.oninput = () => {
-    console.log(input.value)
     search(input.value)
   }
 
@@ -83,7 +89,6 @@ function checkHeaderWidth() {
     }
 
     let createResultsHTML = results => {
-      console.log(results)
       let dom = []
       results.forEach(postInfo => {
         dom += "<li class='search-results-item'><a href='" + postInfo.url + "'>" + postInfo.title + '</a></li>'

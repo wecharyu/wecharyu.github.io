@@ -1,5 +1,6 @@
 url: "https://wecharyu.github.io"
 baseurl: ""
+site-title: "Wechar's Blog"
 
 collections_dir: "collections"
 permalink: /:year/:month/:day/:title:output_ext
@@ -23,3 +24,18 @@ category_archive:
 tag_archive:
   type: liquid
   path: /tags
+
+plugins:
+  - jekyll-polyglot
+
+# jekyll-polyglot
+languages: ["en", "zh"]
+default_lang: "en"
+exclude_from_localization:
+  - "assets/css"
+  - "assets/img"
+  - "assets/js"
+  - "assets/res"
+parallel_localization: true
+sass: # https://github.com/untra/polyglot/issues/107#issuecomment-598274075
+  sourcemap: never

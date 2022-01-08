@@ -21,6 +21,15 @@
   clear: both;
 }
 
+.notice-warning {
+  margin: 2em 0;
+  padding: 1em;
+  color: #3d4144;
+  background-color: #f7e5cd;
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgb(214 127 5 / 25%);
+}
+
 .post-title {
   margin-top: 0;
   line-height: 1;
@@ -47,7 +56,7 @@
     width: 200px;
     margin-right: -200px;
     padding-left: 1em;
-    z-index: 10;
+    z-index: 1;
   }
 }
 
