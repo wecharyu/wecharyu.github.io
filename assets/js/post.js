@@ -13,6 +13,9 @@ $(document).ready(() => {
   // estimate read minutes
   readMinutes()
 
+  // recover the scroll event for window after each scroll finished
+  recoverScroll()
+
   // scroll match the toc
   $(window).bind('scroll', locateToc);
 
@@ -39,12 +42,24 @@ function clickToc() {
       $(window).unbind('scroll')
       $(toc_hs).removeClass('active')
       $(toc_hs[i]).addClass('active')
-      // recover the scroll event for window
-      setTimeout(() => {
-        $(window).bind('scroll', locateToc);
-      }, 1000);
     })
   }
+}
+
+/**
+ * recover the scroll event for window after each scroll finished
+ */
+function recoverScroll() {
+  var timer = null;
+  window.addEventListener('scroll', function() {
+    if(timer !== null) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(function() {
+      // recover the scroll event for window
+      $(window).bind('scroll', locateToc);
+    }, 100);
+  }, false);
 }
 
 function locateToc() {
