@@ -103,6 +103,10 @@
   font-size: 0.75em;
 }
 
+.toc-menu li.active {
+  background-color: lightgray;
+}
+
 .toc-menu a {
   display: block;
   padding: 0.25rem 0.75rem;
