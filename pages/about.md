@@ -1,5 +1,5 @@
 ---
-title: "About"
-layout: page
+title: "about_label"
+layout: archive
 permalink: /about
 ---

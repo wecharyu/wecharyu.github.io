@@ -4,7 +4,9 @@
 <link rel="shortcut icon" type="image/jpg" href="/assets/img/avatar.jpeg">
 
 <title>
-  {% if page.title %}
+  {% if page.layout == "archive" %}
+    {{ site.data.ui-text[site.active_lang][page.title] | append: " - " | append: site.data.l10n.title | excape }}
+  {% elsif page.title %}
     {{ page.title | append: ' - ' | append: site.data.l10n.title | escape }}
   {% else %}
     {{ site.data.l10n.title | escape }}
