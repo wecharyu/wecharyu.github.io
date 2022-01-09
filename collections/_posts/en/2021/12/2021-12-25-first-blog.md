@@ -14,7 +14,7 @@ It's a simply excerpt, used to do the test for my first blog in build the whole 
 身为 Gentoo 官方安装文档，当前版本的 Gentoo 手册将重点放在了基于 OpenRC 的系统的配置，而不是 systemd。毕竟 OpenRC 是主要由 Gentoo 维护的项目，如果连自家的发行版都不把自己维护的 init 系统作为首选推荐的话，那就好比百度员工都在用谷歌。对于想安装 systemd 的用户，
 
 身为 Gentoo 官方安装文档，当前版本的 Gentoo 手册将重点放在了基于 OpenRC 的系统的配置，而不是 systemd。毕竟 OpenRC 是主要由 Gentoo 维护的项目，如果连自家的发行版都不把自己维护的 init 系统作为首选推荐的话，那就好比百度员工都在用谷歌。对于想安装 systemd 的用户，
-[gentoo-wiki-systemd]: https://wiki.gentoo.org/wiki/Systemd/zh-cn
+[gentoo-wiki-systemd]: [https://wiki.gentoo.org/wiki/Systemd/zh-cn](https://wiki.gentoo.org/wiki/Systemd/zh-cn)
 身为 Gentoo 官方安装文档，当前版本的 Gentoo 手册将重点放在了基于 OpenRC 的系统的配置，而不是 systemd。毕竟 OpenRC 是主要由 Gentoo 维护的项目，如果连自家的发行版都不把自己维护的 init 系统作为首选推荐的话，那就好比百度员工都在用谷歌。对于想安装 systemd 的用户，
 身为 Gentoo 官方安装文档，当前版本的 Gentoo 手册将重点放在了基于 OpenRC 的系统的配置，而不是 systemd。毕竟 OpenRC 是主要由 Gentoo 维护的项目，如果连自家的发行版都不把自己维护的 init 系统作为首选推荐的话，那就好比百度员工都在用谷歌。对于想安装 systemd 的用户，
 身为 Gentoo 官方安装文档，当前版本的 Gentoo 手册将重点放在了基于 OpenRC 的系统的配置，而不是 systemd。毕竟 OpenRC 是主要由 Gentoo 维护的项目，如果连自家的发行版都不把自己维护的 init 系统作为首选推荐的话，那就好比百度员工都在用谷歌。对于想安装 systemd 的用户，
