@@ -40,6 +40,7 @@ nav ul {
 .greedy-nav a {
   color: inherit;
   margin: 0 1rem;
+  white-space: nowrap;
 }
 
 .greedy-nav button {
