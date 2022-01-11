@@ -103,7 +103,7 @@
   font-size: 0.75em;
 }
 
-.toc-menu li.active {
+.toc-menu a.active {
   background-color: lightgray;
 }
 
@@ -114,6 +114,23 @@
   font-weight: bold;
   line-height: 1.5;
   border-bottom: 1px solid #f2f2f2;
+}
+
+.toc-menu li ul > li a {
+  padding-left: 1.25rem;
+  font-weight: normal;
+}
+
+.toc-menu li ul li ul > li a {
+  padding-left: 1.75rem;
+}
+
+.toc-menu li ul li ul li ul > li a {
+  padding-left: 2.25rem;
+}
+
+.toc-menu li ul li ul li ul li ul > li a {
+  padding-left: 2.75rem;
 }
 
 @media(min-width: 64em) {

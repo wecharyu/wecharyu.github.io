@@ -35,7 +35,7 @@ function readMinutes() {
 
 function clickToc() {
   // all anchors of toc
-  let toc_hs = $('.toc').find('li')
+  let toc_hs = $('.toc').find('a')
   for (let i = 0; i < toc_hs.length; ++i) {
     $(toc_hs[i]).click(() => {
       // cancel scroll event for window
@@ -72,7 +72,7 @@ function locateToc() {
   // all anchors of this article
   let post_hs = $('.article :header')
   // all anchors of toc
-  let toc_hs = $('.toc').find('li')
+  let toc_hs = $('.toc').find('a')
   $(toc_hs).removeClass('active')
   for (let i = 0; i < post_hs.length; i++) {
     let h_height = $(post_hs[i]).offset().top
