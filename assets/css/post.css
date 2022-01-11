@@ -125,3 +125,17 @@
 .article a {
   color: #2068c5;
 }
+
+
+.article ul, .article ol {
+  margin-top: -1em;
+  margin-bottom: 0;
+}
+
+.article ul li {
+  list-style: disc;
+}
+
+.article ol li {
+  list-style: decimal;
+}

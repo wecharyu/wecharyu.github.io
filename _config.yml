@@ -5,6 +5,10 @@ site-title: "Wechar's Blog"
 collections_dir: "collections"
 permalink: /:year/:month/:day/:title:output_ext
 
+markdown: kramdown
+kramdown:
+  input: GFM
+
 exclude:
   - "README.md"
 

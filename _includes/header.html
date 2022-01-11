@@ -10,7 +10,7 @@ var searchIndex = [
         human: "{{ post.date | date: '%e %B %Y' }}",
         machine: "{{ post.date | date: '%Y-%m-%d' }}"
       },
-      excerpt: "{{ post.excerpt | strip_html | escape | strip }}",
+      excerpt: `{{ post.excerpt | markdownify | strip_html | escape | strip }}`,
       title: "{{ post.title | escape }}",
       url: "{{ site.baseurl }}{{ l10n_url }}"
     }{% unless forloop.last %},{% endunless %}
