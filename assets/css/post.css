@@ -60,6 +60,13 @@
   }
 }
 
+@media (min-width: 80em) {
+  .sidebar-right {
+    width: 300px;
+    margin-right: -300px;
+  }
+}
+
 .sidebar-right {
   margin-bottom: 1em;
 }

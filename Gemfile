@@ -11,5 +11,7 @@ gem "jekyll"
 gem "minimal-mistakes-jekyll"
 
 # Plugins
+gem "kramdown"
+gem "rouge"
 gem "jekyll-polyglot"
 gem "jekyll-paginate-v2"

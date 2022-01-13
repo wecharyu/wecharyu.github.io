@@ -5,9 +5,14 @@ site-title: "Wechar's Blog"
 collections_dir: "collections"
 permalink: /:year/:month/:day/:title:output_ext
 
-markdown: kramdown
+# Conversion
+markdown:    kramdown
+
+# Markdown Processors
 kramdown:
   input: GFM
+  auto_ids: true
+  syntax_highlighter: rouge
 
 exclude:
   - "README.md"
