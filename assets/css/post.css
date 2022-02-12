@@ -35,10 +35,6 @@
   line-height: 1;
 }
 
-.post-wrapper .post-meta {
-  margin-top: -0.5em;
-}
-
 .post-content p {
   margin: 0 0 1.2em;
 }
@@ -150,10 +146,13 @@
   color: #2068c5;
 }
 
-
 .article ul, .article ol {
   margin-top: -1em;
-  margin-bottom: 0;
+}
+
+.article li {
+  margin-top: 1em;
+  margin-bottom: -1em;
 }
 
 .article ul li {
