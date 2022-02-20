@@ -69,12 +69,12 @@ function checkHeaderWidth() {
     }
     // Variables
     let reg = new RegExp(query, 'i');
-    // priority1 stores posts whose title match
+    // priority1 stores posts whose serial or title match
     let priority1 = [];
     // priority2 stores posts whose excerpt match
 	  let priority2 = [];
     searchIndex.forEach(postInfo => {
-      if (reg.test(postInfo.title)) {
+      if (reg.test(postInfo.serial) || reg.test(postInfo.title)) {
         return priority1.push(postInfo)
       }
       if (reg.test(postInfo.excerpt)) {

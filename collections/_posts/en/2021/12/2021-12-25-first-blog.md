@@ -5,6 +5,8 @@ layout: post
 lang: en
 categories: Tutorial
 tags: tag1
+serial: sample
+serial_order: 1
 ---
 
 It's a simply excerpt, used to do the test for my first blog in build the whole blog site. Hopefully it will help me a lot. So I can finished it finally.

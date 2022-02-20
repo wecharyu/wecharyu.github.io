@@ -43,6 +43,10 @@ nav ul {
   white-space: nowrap;
 }
 
+.greedy-nav a.site-title {
+  margin-left: 0;
+}
+
 .greedy-nav button {
   color: inherit;
   font: inherit;

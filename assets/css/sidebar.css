@@ -1,0 +1,33 @@
+@media(min-width: 64em) {
+  .sidebar {
+    float: left;
+    width: 200px;
+    padding-right: 1em;
+    z-index: 1;
+  }
+}
+
+@media (min-width: 80em) {
+  .sidebar {
+    width: 300px;
+  }
+}
+
+.sidebar {
+  margin: 1em 0;
+  opacity: 0.75;
+}
+
+.sidebar .nav-title {
+  padding-left: 0;
+}
+
+.sidebar ul li {
+  font-size: 0.75rem;
+  line-height: normal;
+  margin: 6px 0;
+}
+
+.active {
+  font-weight: bold;
+}

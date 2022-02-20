@@ -1,10 +1,13 @@
 ---
-title: "我的第四篇个人博客"
+# title: "我的第四篇个人博客fijafjigiaghiaseghifhiahfijigjasigjiagjijetiajfijfiajiogjikasfligjeowifgapjfia;fjiafjiw"
+title: "我的第四篇个人博客fijafjigfiashenem fajigoaufaijijfijaifjiaejgijaiklfjiqwojfpajfaoj"
 toc: true
 layout: post
 lang: zh
 categories: 教程
 tags: tag2 tag4
+serial: 博客例子
+serial_order: 2
 ---
 
 It's a simply excerpt, used to do the test for my first blog in build the whole blog site. Hopefully it will help me a lot. So I can finished it finally.

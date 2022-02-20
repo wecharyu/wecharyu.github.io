@@ -1,0 +1,20 @@
+{% if page.serial %}
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+  <div class="sidebar">
+    <nav>
+      <h3 class="nav-title">{{ page.serial }}</h3>
+      {% assign posts = site.posts | where: "lang", site.active_lang %}
+      {% comment %} Get all posts under current serial and do sort {% endcomment %}
+      {% assign same_serial_posts = posts | where: 'serial', page.serial %}
+      {% assign ordered_posts = same_serial_posts | sort: 'serial_order' %}
+
+      <ul>
+        {% for post in ordered_posts %}
+        <li {% if post.title==page.title %}class="active"{% endif %}>
+          <a href="{{post.url}}">{{ post.title }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+  </div>
+{% endif %}

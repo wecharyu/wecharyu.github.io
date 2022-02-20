@@ -48,7 +48,7 @@
   .sidebar-right {
     position: absolute;
     top: 0;
-    right: 0;
+    float: right;
     width: 200px;
     margin-right: -200px;
     padding-left: 1em;
