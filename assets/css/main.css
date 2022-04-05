@@ -63,6 +63,21 @@ img {
   vertical-align: middle;
 }
 
+table {
+  border-left:1px solid #000000;border-top:1px solid #000000;
+  width: 100%;
+  word-wrap:break-word; word-break:break-all;
+}
+
+table th, td {
+  text-align:center;
+  border-right:1px solid #000000;border-bottom:1px solid #000000;
+}
+
+td.left {
+  text-align: left;
+}
+
 .clear {
   clear: both;
   height: 1px;
