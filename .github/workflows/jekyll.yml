@@ -1,0 +1,32 @@
+name: Jekyll Site CI
+
+on:
+  push:
+    branches: [ posts ]
+  pull_request:
+    branches: [ posts ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the site in the alpine/bundle container
+      run: |
+        docker run \
+        -v ${{ github.workspace }}:/srv/jekyll -v ${{ github.workspace }}/_site:/srv/jekyll/_site -w /srv/jekyll \
+        alpine/bundle:latest /bin/bash -c "bundle install && bundle exec jekyll build"
+    - name: Push the site to the gh-pages branch
+      if: ${{ github.event_name == 'push' }}
+      run: |
+        sudo chown $( whoami ):$( whoami ) ${{ github.workspace }}/_site
+        cd ${{ github.workspace }}/_site
+        git init -b gh-pages
+        git config user.name ${{ github.actor }}
+        git config user.email ${{ github.actor }}@users.noreply.github.com
+        git remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+        git add .
+        git commit -m "Deploy site built from commit ${{ github.sha }}"
+        git push -f -u origin gh-pages
