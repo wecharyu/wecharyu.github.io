@@ -142,6 +142,10 @@
   }
 }
 
+.article {
+  word-wrap:break-word;
+}
+
 .article a {
   color: #2068c5;
 }
