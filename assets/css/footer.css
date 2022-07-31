@@ -1,0 +1,37 @@
+.footer-container {
+  font-size: 0.75em;
+  color: #646769;
+  margin: 2em 0 0 0;
+  background-color: #e2e3e3;
+}
+
+#footer {
+  padding: 1em;
+  text-align: center;
+}
+
+#visitor-line {
+  display: flex;
+  justify-content: center;
+}
+
+#visitor-line .icon {
+  width: 1.5em;
+  height: 1.5em;
+  margin-right: 0.2em;
+}
+
+#powered-list {
+  display: flex;
+  justify-content: center;
+}
+
+#powered-list ul {
+  margin: 0;
+  padding: 0;
+}
+
+#powered-list ul li {
+  display: inline-block;
+  margin-left: 0.5em;
+}

@@ -1,0 +1,22 @@
+.pagination {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.archive-item-title {
+  margin-bottom: 0.25em;
+  line-height: initial;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.archive-item .post-meta {
+  margin: 0 0 4px;
+  border-bottom: none;
+}
+
+.archive-item-excerpt {
+  color: #3d4144;
+  margin-top: 0;
+  font-size: 0.75em;
+}
