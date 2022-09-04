@@ -1,0 +1,15 @@
+.word-cloud {
+  text-align: center;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.word-cloud li {
+  display: inline-block;
+}
+
+.word-cloud a {
+  display: inline-block;
+  margin: 0.5em;
+}

@@ -1,0 +1,174 @@
+@media(min-width: 64em) {
+  .post {
+    float: right;
+    padding-right: 200px;
+    width: calc(100% - 200px);
+  }
+}
+
+@media(min-width: 80em) {
+  .post {
+    float: right;
+    padding-right: 300px;
+    width: calc(100% - 300px);
+  }
+}
+
+.post .post-wrapper {
+  float: left;
+  margin: 1em 0;
+  width: 100%;
+  clear: both;
+}
+
+.notice-warning {
+  margin: 2em 0;
+  padding: 1em;
+  color: #3d4144;
+  background-color: #f7e5cd;
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgb(214 127 5 / 25%);
+}
+
+.post-title {
+  margin-top: 0;
+  line-height: 1;
+}
+
+.post-content p {
+  margin: 0 0 1.2em;
+}
+
+.post-content h2 {
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+@media(min-width: 64em) {
+  .sidebar-right {
+    position: absolute;
+    top: 0;
+    float: right;
+    width: 200px;
+    margin-right: -200px;
+    padding-left: 1em;
+    z-index: 1;
+  }
+}
+
+@media (min-width: 80em) {
+  .sidebar-right {
+    width: 300px;
+    margin-right: -300px;
+  }
+}
+
+.sidebar-right {
+  margin-bottom: 1em;
+}
+
+@media(min-width: 64em) {
+  .sticky {
+    clear: both;
+    position: sticky;
+    top: 6em;
+    float: right;
+  }
+}
+
+.sidebar-right .toc {
+  color: #7a8288;
+  background-color: #fff;
+  border: 1px solid #f2f2f2;
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 13%);
+}
+
+.nav-title {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  font-weight: bold;
+}
+
+.sidebar-right .nav-title {
+  color: #fff;
+  font-size: 0.75em;
+  background: #242424;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.toc-menu {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  list-style: none;
+  font-size: 0.75em;
+}
+
+.toc-menu a.active {
+  background-color: lightgray;
+}
+
+.toc-menu a {
+  display: block;
+  padding: 0.25rem 0.75rem;
+  color: #646769;
+  font-weight: bold;
+  line-height: 1.5;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.toc-menu li ul > li a {
+  padding-left: 1.25rem;
+  font-weight: normal;
+}
+
+.toc-menu li ul li ul > li a {
+  padding-left: 1.75rem;
+}
+
+.toc-menu li ul li ul li ul > li a {
+  padding-left: 2.25rem;
+}
+
+.toc-menu li ul li ul li ul li ul > li a {
+  padding-left: 2.75rem;
+}
+
+@media(min-width: 64em) {
+  .toc-menu {
+    font-size: 0.6875em;
+  }
+}
+
+.article {
+  word-wrap:break-word;
+}
+
+.article a {
+  color: #2068c5;
+}
+
+.article ul, .article ol {
+  margin-top: -1em;
+}
+
+.article li {
+  margin-top: 1em;
+  margin-bottom: -1em;
+}
+
+.article ul li {
+  list-style: disc;
+}
+
+.article ol li {
+  list-style: decimal;
+}
+
+.article img {
+  max-width: 90%;
+  margin: auto;
+  display: block;
+}

@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" type="image/jpg" href="/assets/img/avatar.jpeg">
+
+<title>
+  
+    HikariCP源码分析 - 伟强的博客
+  
+</title>
+
+<!-- style all pages needs -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<script src="/assets/js/utils.js"></script>
+<script src="/assets/js/jquery-3.6.0.min.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  </head>
+
+  <body>
+    <script>
+// searchIndex store all posts information in active_lang and can be used in header.js directly
+
+var searchIndex = [
+  
+    
+    
+    {
+      date: {
+        human: "16 January 2022",
+        machine: "2022-01-16"
+      },
+      excerpt: `HikariCP是一个快速，简单可靠的JDBC连接池，SpringBoot2.0开始默认使用该数据库连接池。JDBC连接池是一种管理多连接请求的机制，换句话说，它对数据库连接进行缓存，促使连接的重用。`,
+      title: "HikariCP源码分析",
+      url: "/zh/2022/01/16/database-hikaricp.html",
+      serial: ""
+    },
+  
+    
+    
+    {
+      date: {
+        human: " 3 October 2021",
+        machine: "2021-10-03"
+      },
+      excerpt: `Security Shell Protocal (SSH)是一种网络协议，旨在为不安全的网络提供安全的加密通信。SSH应用基于客户端/服务端架构，SSH客户端用于登录远程机器（SSH服务器）并在远程机器上执行命令。
+最常见的SSH应用包括：
+
+  SSH远程登录
+  任意TCP端口转发`,
+      title: "SSH远程登录和TCP端口转发",
+      url: "/zh/2021/10/03/ssh-remote-login-and-tcp-forwarding.html",
+      serial: ""
+    },
+  
+    
+    
+    {
+      date: {
+        human: "18 September 2021",
+        machine: "2021-09-18"
+      },
+      excerpt: `Hive DDL语句主要和database/schema, table/view, function等有关，全部的操作可以查看Hive Confluence, 包括：
+
+  CREATE DATABASE/SCHEMA, TABLE, VIEW, FUNCTION, INDEX
+  DROP DATABASE/SCHEMA, TABLE, VIEW, INDEX
+  TRUNCATE TABLE
+  ALTER DATABASE/SCHEMA, TABLE, VIEW
+  MSCK REPAIR TABLE (or ALTER TABLE RECOVER PARTITIONS)
+  SHOW DATABASES/SCHEMAS, TABLES, TBLPROPERTIES, VIEWS, PARTITIONS, FUNCTIONS, INDEX[ES], COLUMNS, CREATE TABLE
+  DESCRIBE database/schema, table, view`,
+      title: "Hive系列(2) - Hive数据定义操作(DDL)",
+      url: "/zh/2021/09/18/hive-serial-2-hive-data-definition-operation.html",
+      serial: "Hive系列文章"
+    },
+  
+    
+    
+    {
+      date: {
+        human: "11 September 2021",
+        machine: "2021-09-11"
+      },
+      excerpt: `Apache Hive™是一个基于Apache Hadoop™的数据仓库设施，便于读、写和管理分布式存储中的大型数据集,并通过SQL语法查询数据。`,
+      title: "Hive系列(1) - Hive介绍",
+      url: "/zh/2021/09/11/hive-serial-1-introduction-to-hive.html",
+      serial: "Hive系列文章"
+    },
+  
+    
+    
+    {
+      date: {
+        human: " 3 August 2021",
+        machine: "2021-08-03"
+      },
+      excerpt: `find程序递归向下遍历每个路径的目录树，对树中每个文件计算表达式。基本用法：
+find [options] path [expression]`,
+      title: "find - 遍历文件结构",
+      url: "/zh/2021/08/03/find-walk-a-file-hierarchy.html",
+      serial: ""
+    }
+  
+  ];
+</script>
+
+<link rel="stylesheet" href="/assets/css/header.css">
+
+<div class="header-container">
+  <!-- header component -->
+  <div id="header">
+    <div id="header-wrap" class="main-width">
+      <div class="header-menu">
+        <nav id="site-nav" class="greedy-nav">
+          <a class="site-title" href="/zh/">
+            伟强的博客
+          </a>
+          <div id="nav-placeholder"></div>
+          <!-- navigation menu -->
+          <ul id="nav-menu" class="visible-links hidden">
+            
+              <li>
+                <a href="/zh/tags">标签</a>
+              </li>
+            
+              <li>
+                <a href="/zh/categories">分类</a>
+              </li>
+            
+              <li>
+                <a href="/zh/about">关于</a>
+              </li>
+            
+          </ul>
+          <!-- navigation in button -->
+          <button id="nav-toggle" class="toggle-button hidden" type="button">
+            <svg class="icon" fill="none" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24">
+              <path d="M 2 5 L 2 7 L 22 7 L 22 5 L 2 5 z M 2 11 L 2 13 L 22 13 L 22 11 L 2 11 z M 2 17 L 2 19 L 22 19 L 22 17 L 2 17 z"/>
+            </svg>
+          </button>
+          <ul id="toggle-menu" class="floating-menu drop-down hidden">
+            
+              <li>
+                <a href="/zh/tags">标签</a>
+              </li>
+            
+              <li>
+                <a href="/zh/categories">分类</a>
+              </li>
+            
+              <li>
+                <a href="/zh/about">关于</a>
+              </li>
+            
+          </ul>
+
+          <!-- language toggle -->
+          <button id="language-toggle-button" class="toggle-button" type="button">
+            <svg class="icon" fill="none" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+              <path d="M54.22424,84.1345a79.93034,79.93034,0,0,0,9.75452,16.547,80.11705,80.11705,0,0,0,9.78468-16.547C67.27032,83.83522,60.71736,83.83522,54.22424,84.1345Z"/>
+              <path d="M31.214,86.40867a40.29838,40.29838,0,0,0,22.65121,15.73914,83.13981,83.13981,0,0,1-9.15639-17.3551C40.19069,85.18175,35.67239,85.72029,31.214,86.40867Z"/>
+              <path d="M26.63579,48.7064a39.78148,39.78148,0,0,0,0,29.2342c5.17651-.86769,10.38312-1.55606,15.44-2.0647a58.36749,58.36749,0,0,1,0-25.13478C36.98894,50.2624,31.8123,49.57427,26.63579,48.7064Z"/>
+              <path d="M51.232,75.18778q6.3734-.35919,12.74673-.35906c4.2791,0,8.528.1196,12.7769.35906a49.84143,49.84143,0,0,0,0-23.75835,213.654,213.654,0,0,1-25.52363,0A49.84269,49.84269,0,0,0,51.232,75.18778Z"/>
+              <path d="M101.35189,77.9406a40.18364,40.18364,0,0,0,0-29.2342c-5.17663.86787-10.38312,1.556-15.44,2.03472a58.37343,58.37343,0,0,1,0,25.13478C90.96877,76.38454,96.17526,77.07291,101.35189,77.9406Z"/>
+              <path d="M74.09252,24.49932a81.92266,81.92266,0,0,1,9.18618,17.355c4.51829-.389,9.03659-.95756,13.495-1.61578A40.36606,40.36606,0,0,0,74.09252,24.49932Z"/>
+              <path d="M73.76344,42.51243a79.34932,79.34932,0,0,0-9.78468-16.54692,79.16673,79.16673,0,0,0-9.75452,16.54692C60.71736,42.81178,67.27032,42.81178,73.76344,42.51243Z"/>
+              <path d="M13.08975,42.2107a3.51727,3.51727,0,0,0,4.07735-.23788c1.16892-.98559,1.68686-2.81907,2.20039-4.197l1.85724-4.988H37.03727l1.85717,4.88169c.68435,1.7952,1.518,4.46337,3.63559,4.96968a3.90555,3.90555,0,0,0,4.77479-3.51059,12.61677,12.61677,0,0,0-1.19394-4.16528L35.94949,9.86493a24.56261,24.56261,0,0,0-2.26588-5.03912c-1.45-2.10995-4.24742-2.19995-6.6383-1.33477-2.87846,1.04158-3.7283,4.53011-4.7328,7.08012-.00679.01729-9.94916,24.60447-9.94916,24.60447C11.40962,37.53924,10.38149,40.58311,13.08975,42.2107ZM29.05143,11.47316l5.86338,15.39825H23.2942Z"/>
+              <path d="M112.23907,97.94689a3.02125,3.02125,0,1,0,0-6.0425h-20.182l.34315-3.82087a3.02155,3.02155,0,0,0-6.01893-.53993l-.39167,4.3608h-6.89a3.02125,3.02125,0,1,0,0,6.0425h6.34712L84.493,108.56564a3.01874,3.01874,0,0,0,.66978,2.18184,33.3858,33.3858,0,0,0,4.9226,4.59718,27.70117,27.70117,0,0,1-12.57761,4.14058,3.02141,3.02141,0,0,0,.267,6.03075c.09,0,.18144-.0044.27288-.01182A32.95306,32.95306,0,0,0,95.526,118.94072c4.24479,2.36386,9.73359,5.13522,16.42833,5.76792q.146.01329.28766.01326a3.02134,3.02134,0,0,0,.28181-6.02924c-4.82732-.45641-8.91134-2.50326-12.26745-4.14461a41.01,41.01,0,0,0,8.51314-16.60116Zm-17.29922,13.4436a34.42481,34.42481,0,0,1-4.30845-3.61857l.88277-9.825H102.531A33.01224,33.01224,0,0,1,94.93985,111.39049Z"/>
+              <path d="M64,5.34663A57.70263,57.70263,0,0,0,44.60032,8.69294L47.396,15.576A50.52175,50.52175,0,0,1,110.3604,83.43274h1.88489a11.45044,11.45044,0,0,1,5.54882,1.44017,57.48148,57.48148,0,0,0,4.1722-21.56C121.96631,33.09586,95.95881,5.34663,64,5.34663Z"/>
+              <path d="M13.44629,63.96606a49.68,49.68,0,0,1,1.48253-12.11422A11.85157,11.85157,0,0,1,7.855,49.52211,57.99058,57.99058,0,0,0,64,121.93231c.78359,0,1.58843-.02118,2.372-.06342a11.3226,11.3226,0,0,1,2.58388-6.07832,10.19268,10.19268,0,0,1,1.84253-1.73669A48.0252,48.0252,0,0,1,64,114.51977,50.60267,50.60267,0,0,1,13.44629,63.96606Z"/>
+            </svg>
+          </button>
+          <ul id="language-options" class="floating-menu drop-down hidden">
+            
+            
+            
+                <li class="lang-option-inactive">
+              <a href="/2022/01/16/database-hikaricp.html">
+                English
+              </a>
+            </li>
+              
+            
+            
+            
+            <li class="lang-option-active">简体中文</li>
+              
+            
+          </ul>
+
+          <!-- button for search -->
+          <button id="search-button" class="toggle-button" type="button">
+            <svg class="icon" fill="none" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24">
+              <path d="M 9 2 C 5.1458514 2 2 5.1458514 2 9 C 2 12.854149 5.1458514 16 9 16 C 10.747998 16 12.345009 15.348024 13.574219 14.28125 L 14 14.707031 L 14 16 L 20 22 L 22 20 L 16 14 L 14.707031 14 L 14.28125 13.574219 C 15.348024 12.345009 16 10.747998 16 9 C 16 5.1458514 12.854149 2 9 2 z M 9 4 C 11.773268 4 14 6.2267316 14 9 C 14 11.773268 11.773268 14 9 14 C 6.2267316 14 4 11.773268 4 9 C 4 6.2267316 6.2267316 4 9 4 z"/>
+            </svg>
+          </button>
+          <!-- </button> -->
+          <div id="search-bar" class="drop-down hidden">
+            <input type="text" id="search-input" placeholder="Search blog posts...">
+            <ul id="search-results">
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <!-- placeholder div for fixed position header -->
+  <div id="header-placeholder"></div>
+</div>
+
+<script src="/assets/js/header.js"></script>
+
+
+    <link rel="stylesheet" href="/assets/css/content.css">
+<script src="/assets/js/content.js"></script>
+
+<div class="content-container">
+  <div id="content" class="main-width">
+    <link rel="stylesheet" href="/assets/css/post.css">
+<link rel="stylesheet" href="/assets/css/post-meta.css">
+<script src="/assets/js/post.js"></script>
+
+
+
+<article class="post">
+  <meta itemprop="headline" content="HikariCP源码分析">
+  <meta itemprop="description" content="HikariCP是一个快速，简单可靠的JDBC连接池，SpringBoot2.0开始默认使用该数据库连接池。JDBC连接池是一种管理多连接请求的机制，换句话说，它对数据库连接进行缓存，促使连接的重用。">
+  <meta itemprop="datePublished" content="2022-01-16T00:00:00+00:00">
+  
+
+  <div class="post-wrapper">
+    <header>
+      <h1 id="post-title" class="post-title" itemprop="headline">HikariCP源码分析
+</h1>
+      
+
+
+<p class="post-meta">
+  <!-- post create time -->
+  <span>
+    <svg class="icon" viewBox="0 0 36 36" version="1.1"  preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <title>create-date</title>
+        <path class="clr-i-outline clr-i-outline-path-1" d="M32.25,6H29V8h3V30H4V8H7V6H3.75A1.78,1.78,0,0,0,2,7.81V30.19A1.78,1.78,0,0,0,3.75,32h28.5A1.78,1.78,0,0,0,34,30.19V7.81A1.78,1.78,0,0,0,32.25,6Z"></path><rect class="clr-i-outline clr-i-outline-path-2" x="8" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-3" x="14" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-4" x="20" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-5" x="26" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-6" x="8" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-7" x="14" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-8" x="20" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-9" x="26" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-10" x="8" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-11" x="14" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-12" x="20" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-13" x="26" y="24" width="2" height="2"></rect><path class="clr-i-outline clr-i-outline-path-14" d="M10,10a1,1,0,0,0,1-1V3A1,1,0,0,0,9,3V9A1,1,0,0,0,10,10Z"></path><path class="clr-i-outline clr-i-outline-path-15" d="M26,10a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V9A1,1,0,0,0,26,10Z"></path><rect class="clr-i-outline clr-i-outline-path-16" x="13" y="6" width="10" height="2"></rect>
+        <rect x="0" y="0" width="36" height="36" fill-opacity="0"/>
+    </svg>
+    
+    <time datetime="2022-01-16T00:00:00+00:00">2022-01-16</time>
+  </span>
+  
+  <!-- post views counts -->
+  <span class="span-divider"></span>
+  <span>
+    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 83.78" style="enable-background:new 0 0 122.88 83.78" xml:space="preserve">
+      <g>
+        <title>views</title>
+        <path d="M95.73,10.81c10.53,7.09,19.6,17.37,26.48,29.86l0.67,1.22l-0.67,1.21c-6.88,12.49-15.96,22.77-26.48,29.86 C85.46,79.88,73.8,83.78,61.44,83.78c-12.36,0-24.02-3.9-34.28-10.81C16.62,65.87,7.55,55.59,0.67,43.1L0,41.89l0.67-1.22 c6.88-12.49,15.95-22.77,26.48-29.86C37.42,3.9,49.08,0,61.44,0C73.8,0,85.45,3.9,95.73,10.81L95.73,10.81z M60.79,22.17l4.08,0.39 c-1.45,2.18-2.31,4.82-2.31,7.67c0,7.48,5.86,13.54,13.1,13.54c2.32,0,4.5-0.62,6.39-1.72c0.03,0.47,0.05,0.94,0.05,1.42 c0,11.77-9.54,21.31-21.31,21.31c-11.77,0-21.31-9.54-21.31-21.31C39.48,31.71,49.02,22.17,60.79,22.17L60.79,22.17L60.79,22.17z M109,41.89c-5.5-9.66-12.61-17.6-20.79-23.11c-8.05-5.42-17.15-8.48-26.77-8.48c-9.61,0-18.71,3.06-26.76,8.48 c-8.18,5.51-15.29,13.45-20.8,23.11c5.5,9.66,12.62,17.6,20.8,23.1c8.05,5.42,17.15,8.48,26.76,8.48c9.62,0,18.71-3.06,26.77-8.48 C96.39,59.49,103.5,51.55,109,41.89L109,41.89z"/>
+      </g>
+    </svg>
+    <span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span></span>
+  </span>
+  <span class="span-divider"></span>
+  <span>
+    <svg version="1.1" class="icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      viewBox="0 0 238.75 238.75" style="enable-background:new 0 0 238.75 238.75;" xml:space="preserve">
+    <g>
+      <title>read-minuts</title>
+      <path d="M156.619,138.47h-33.965v-37.31c0-4.142-3.357-7.5-7.5-7.5c-4.143,0-7.5,3.358-7.5,7.5v44.81c0,4.142,3.357,7.5,7.5,7.5
+        h41.465c4.143,0,7.5-3.358,7.5-7.5C164.119,141.828,160.762,138.47,156.619,138.47z"/>
+      <path d="M191.889,80.546l4.959-4.963l2.379,2.38c1.465,1.466,3.385,2.198,5.305,2.198c1.919,0,3.838-0.732,5.302-2.195
+        c2.93-2.928,2.932-7.677,0.003-10.606l-7.521-7.525c-0.054-0.058-0.102-0.119-0.158-0.175c-0.055-0.055-0.114-0.101-0.171-0.154
+        l-7.5-7.505c-2.93-2.931-7.678-2.931-10.606-0.003c-2.93,2.928-2.932,7.677-0.003,10.606l2.367,2.369l-5.007,5.011
+        c-10.723-9.099-23.466-15.884-37.453-19.574c4.2-5.306,6.718-12.003,6.718-19.281C150.502,13.964,136.541,0,119.381,0
+        c-17.167,0-31.133,13.964-31.133,31.129c0,7.279,2.519,13.977,6.722,19.283C53.958,61.232,23.629,98.64,23.629,143.001
+        c0,52.796,42.954,95.749,95.752,95.749c52.791,0,95.74-42.953,95.74-95.749C215.121,119.158,206.359,97.324,191.889,80.546z
+        M103.248,31.129c0-8.894,7.237-16.129,16.133-16.129c8.89,0,16.121,7.235,16.121,16.129c0,8.891-7.232,16.125-16.121,16.125
+        C110.485,47.254,103.248,40.02,103.248,31.129z M119.381,223.75c-44.526,0-80.752-36.224-80.752-80.749
+        c0-44.524,36.226-80.747,80.752-80.747c44.521,0,80.74,36.223,80.74,80.747C200.121,187.526,163.901,223.75,119.381,223.75z"/>
+      <path d="M119.381,73.184c-37.315,0-67.674,30.357-67.674,67.671c0,37.312,30.358,67.668,67.674,67.668
+        c37.309,0,67.662-30.356,67.662-67.668C187.043,103.54,156.689,73.184,119.381,73.184z M119.381,193.523
+        c-29.045,0-52.674-23.627-52.674-52.668c0-29.043,23.629-52.671,52.674-52.671c29.038,0,52.662,23.628,52.662,52.671
+        C172.043,169.895,148.419,193.523,119.381,193.523z"/>
+    </g>
+    </svg>
+    <span id="read-minutes"></span>
+  </span>
+  
+</p>
+
+    </header>
+    <section class="post-content">
+      <!-- toc -->
+      
+      <aside class="sidebar-right sticky">
+        <nav class="toc">
+          <header>
+            <h4 class="nav-title">
+              <svg version="1.1" class="icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                width="475.082px" height="475.081px" viewBox="0 0 475.082 475.081" style="enable-background:new 0 0 475.082 475.081;"
+                xml:space="preserve">
+              <g>
+                <path d="M461.667,49.963c-8.949-8.947-19.698-13.418-32.265-13.418H45.682c-12.562,0-23.317,4.471-32.264,13.418
+                  C4.473,58.912,0,69.663,0,82.228V392.86c0,12.566,4.473,23.309,13.418,32.261c8.947,8.949,19.701,13.415,32.264,13.415h383.72
+                  c12.566,0,23.315-4.466,32.265-13.415c8.945-8.952,13.415-19.701,13.415-32.261V82.228
+                  C475.082,69.663,470.612,58.909,461.667,49.963z M146.183,392.85c0,2.673-0.859,4.856-2.574,6.571
+                  c-1.712,1.711-3.899,2.562-6.567,2.562h-91.36c-2.662,0-4.853-0.852-6.567-2.562c-1.713-1.715-2.568-3.898-2.568-6.571V338.03
+                  c0-2.669,0.855-4.853,2.568-6.56c1.714-1.719,3.905-2.574,6.567-2.574h91.363c2.667,0,4.858,0.855,6.567,2.574
+                  c1.711,1.707,2.57,3.891,2.57,6.56V392.85z M146.183,283.221c0,2.663-0.859,4.854-2.574,6.564
+                  c-1.712,1.714-3.899,2.569-6.567,2.569h-91.36c-2.662,0-4.853-0.855-6.567-2.569c-1.713-1.711-2.568-3.901-2.568-6.564v-54.819
+                  c0-2.664,0.855-4.854,2.568-6.567c1.714-1.709,3.905-2.565,6.567-2.565h91.363c2.667,0,4.854,0.855,6.567,2.565
+                  c1.711,1.713,2.57,3.903,2.57,6.567V283.221z M146.183,173.587c0,2.666-0.859,4.853-2.574,6.567
+                  c-1.712,1.709-3.899,2.568-6.567,2.568h-91.36c-2.662,0-4.853-0.859-6.567-2.568c-1.713-1.715-2.568-3.901-2.568-6.567V118.77
+                  c0-2.666,0.855-4.856,2.568-6.567c1.714-1.713,3.905-2.568,6.567-2.568h91.363c2.667,0,4.854,0.855,6.567,2.568
+                  c1.711,1.711,2.57,3.901,2.57,6.567V173.587z M292.362,392.85c0,2.673-0.855,4.856-2.563,6.571c-1.711,1.711-3.9,2.562-6.57,2.562
+                  H191.86c-2.663,0-4.853-0.852-6.567-2.562c-1.713-1.715-2.568-3.898-2.568-6.571V338.03c0-2.669,0.855-4.853,2.568-6.56
+                  c1.714-1.719,3.904-2.574,6.567-2.574h91.365c2.669,0,4.859,0.855,6.57,2.574c1.704,1.707,2.56,3.891,2.56,6.56v54.819H292.362z
+                  M292.362,283.221c0,2.663-0.855,4.854-2.563,6.564c-1.711,1.714-3.9,2.569-6.57,2.569H191.86c-2.663,0-4.853-0.855-6.567-2.569
+                  c-1.713-1.711-2.568-3.901-2.568-6.564v-54.819c0-2.664,0.855-4.854,2.568-6.567c1.714-1.709,3.904-2.565,6.567-2.565h91.365
+                  c2.669,0,4.859,0.855,6.57,2.565c1.704,1.713,2.56,3.903,2.56,6.567v54.819H292.362z M292.362,173.587
+                  c0,2.666-0.855,4.853-2.563,6.567c-1.711,1.709-3.9,2.568-6.57,2.568H191.86c-2.663,0-4.853-0.859-6.567-2.568
+                  c-1.713-1.715-2.568-3.901-2.568-6.567V118.77c0-2.666,0.855-4.856,2.568-6.567c1.714-1.713,3.904-2.568,6.567-2.568h91.365
+                  c2.669,0,4.859,0.855,6.57,2.568c1.704,1.711,2.56,3.901,2.56,6.567v54.817H292.362z M438.536,392.85
+                  c0,2.673-0.855,4.856-2.562,6.571c-1.718,1.711-3.908,2.562-6.571,2.562h-91.354c-2.673,0-4.862-0.852-6.57-2.562
+                  c-1.711-1.715-2.56-3.898-2.56-6.571V338.03c0-2.669,0.849-4.853,2.56-6.56c1.708-1.719,3.897-2.574,6.57-2.574h91.354
+                  c2.663,0,4.854,0.855,6.571,2.574c1.707,1.707,2.562,3.891,2.562,6.56V392.85z M438.536,283.221c0,2.663-0.855,4.854-2.562,6.564
+                  c-1.718,1.714-3.908,2.569-6.571,2.569h-91.354c-2.673,0-4.862-0.855-6.57-2.569c-1.711-1.711-2.56-3.901-2.56-6.564v-54.819
+                  c0-2.664,0.849-4.854,2.56-6.567c1.708-1.709,3.897-2.565,6.57-2.565h91.354c2.663,0,4.854,0.855,6.571,2.565
+                  c1.707,1.713,2.562,3.903,2.562,6.567V283.221z M438.536,173.587c0,2.666-0.855,4.853-2.562,6.567
+                  c-1.718,1.709-3.908,2.568-6.571,2.568h-91.354c-2.673,0-4.862-0.859-6.57-2.568c-1.711-1.715-2.56-3.901-2.56-6.567V118.77
+                  c0-2.666,0.849-4.856,2.56-6.567c1.708-1.713,3.897-2.568,6.57-2.568h91.354c2.663,0,4.854,0.855,6.571,2.568
+                  c1.707,1.711,2.562,3.901,2.562,6.567V173.587z"/>
+              </g>
+              </svg>
+              目录
+            </h4>
+          </header>
+          <ul class="toc-menu"><li><a href="#基本用法">基本用法</a><ul><li><a href="#添加依赖">添加依赖</a></li><li><a href="#创建datasource">创建DataSource</a></li><li><a href="#获取连接">获取连接</a></li></ul></li><li><a href="#源码分析">源码分析</a><ul><li><a href="#api">API</a></li><li><a href="#pool">Pool</a><ul><li><a href="#获取连接-1">获取连接</a></li><li><a href="#添加连接">添加连接</a></li><li><a href="#维护连接">维护连接</a></li></ul></li><li><a href="#metrics">metrics</a><ul><li><a href="#dropwizard">dropwizard</a></li><li><a href="#prometheus">prometheus</a></li></ul></li></ul></li><li><a href="#最佳实践">最佳实践</a></li></ul>
+
+        </nav>
+      </aside>
+      
+      <div class="article">
+      <p><a href="https://github.com/brettwooldridge/HikariCP">HikariCP</a>是一个快速，简单可靠的JDBC连接池，<code class="language-plaintext highlighter-rouge">SpringBoot2.0</code>开始默认使用该数据库连接池。JDBC连接池是一种管理多连接请求的机制，换句话说，它对数据库连接进行缓存，促使连接的重用。</p>
+
+<h2 id="基本用法">基本用法</h2>
+<p>要使用<code class="language-plaintext highlighter-rouge">HikariCP</code>, 先要添加依赖，再创建<code class="language-plaintext highlighter-rouge">DataSource</code>来获得连接，如果现在的DataSource过期了，也可以关闭它。</p>
+<h3 id="添加依赖">添加依赖</h3>
+<p>如果不是基于<code class="language-plaintext highlighter-rouge">SpringBoot2.0</code>及以上版本开发应用，就需要显式添加<code class="language-plaintext highlighter-rouge">HikariCP</code>依赖，以<code class="language-plaintext highlighter-rouge">HikariCP 2.6.1</code>为例：</p>
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>
+  <span class="nt">&lt;groupId&gt;</span>com.zaxxer<span class="nt">&lt;/groupId&gt;</span>
+  <span class="nt">&lt;artifactId&gt;</span>HikariCP<span class="nt">&lt;/artifactId&gt;</span>
+  <span class="nt">&lt;version&gt;</span>2.6.1<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<h3 id="创建datasource">创建DataSource</h3>
+<p><code class="language-plaintext highlighter-rouge">HikariCP</code>作为数据库连接池，提供实现了<code class="language-plaintext highlighter-rouge">DataSource</code>接口的<code class="language-plaintext highlighter-rouge">HikariDataSource</code>，使用HikariCP要构造<code class="language-plaintext highlighter-rouge">HikariDataSource</code>实例，有许多方式可以创建：</p>
+
+<ul>
+  <li>默认构造器，需要额外设置配置
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">HikariDataSource</span> <span class="n">ds</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HikariDataSource</span><span class="o">();</span>
+<span class="n">ds</span><span class="o">.</span><span class="na">setJdbcUrl</span><span class="o">(</span><span class="s">"jdbc:mysql://localhost:3306/test"</span><span class="o">);</span>
+<span class="n">ds</span><span class="o">.</span><span class="na">setUsername</span><span class="o">(</span><span class="s">"root"</span><span class="o">);</span>
+<span class="n">ds</span><span class="o">.</span><span class="na">setPassword</span><span class="o">(</span><span class="s">"123456"</span><span class="o">);</span>
+</code></pre></div>    </div>
+  </li>
+  <li>通过<code class="language-plaintext highlighter-rouge">HikariConfig</code>初始化:
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">HikariConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HikariConfig</span><span class="o">();</span>
+<span class="n">config</span><span class="o">.</span><span class="na">setJdbcUrl</span><span class="o">(</span><span class="s">"jdbc:mysql://localhost:3306/test"</span><span class="o">);</span>
+<span class="n">config</span><span class="o">.</span><span class="na">setUsername</span><span class="o">(</span><span class="s">"root"</span><span class="o">);</span>
+<span class="n">config</span><span class="o">.</span><span class="na">setPassword</span><span class="o">(</span><span class="s">"123456"</span><span class="o">);</span>
+<span class="nc">HikariDataSource</span> <span class="n">ds</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HikariDataSource</span><span class="o">(</span><span class="n">config</span><span class="o">);</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h3 id="获取连接">获取连接</h3>
+<p>然后可以通过<code class="language-plaintext highlighter-rouge">ds</code>获取<code class="language-plaintext highlighter-rouge">Connection</code>实例，并用它执行查询：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span> <span class="o">(</span><span class="nc">Connection</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="na">getConnection</span><span class="o">();</span>
+  <span class="nc">Statement</span> <span class="n">st</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="na">createStatement</span><span class="o">()</span>
+<span class="o">)</span> <span class="o">{</span>
+  <span class="nc">ResultSet</span> <span class="n">rs</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="na">executeQuery</span><span class="o">(</span><span class="s">"show tables;"</span><span class="o">);</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">next</span><span class="o">())</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">rs</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="mi">1</span><span class="o">));</span>
+  <span class="o">}</span>
+<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+  <span class="c1">// handle exception</span>
+<span class="o">}</span>
+<span class="c1">// if any required</span>
+<span class="n">ds</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+</code></pre></div></div>
+
+<h2 id="源码分析">源码分析</h2>
+<p><code class="language-plaintext highlighter-rouge">HikariCP</code>主要包含3大组件，如下所示：
+<img src="https://img-blog.csdnimg.cn/img_convert/92ab5923711c9845a0624db01cd375b3.png" alt="" /></p>
+
+<ul>
+  <li>API
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">HikariDataSource</code>代表目标<code class="language-plaintext highlighter-rouge">DataSource</code></li>
+      <li><code class="language-plaintext highlighter-rouge">HikariConfig</code>用于进行数据库相关的配置</li>
+    </ul>
+  </li>
+  <li>Pool
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">HikariPool</code>提供基本的连接池行为，维护一定数量的连接并关闭过期的连接</li>
+      <li><code class="language-plaintext highlighter-rouge">ConcurrentBag</code>将新建的元素保存在sharedList中，将返还的连接保存在threadList中</li>
+      <li><code class="language-plaintext highlighter-rouge">PoolEntry</code>在ConcurrentBag中用于维护真实Connection实例</li>
+    </ul>
+  </li>
+  <li>metrics
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">MetricsTrackerFactory</code>接口来创建<code class="language-plaintext highlighter-rouge">IMetricsTracker</code></li>
+      <li><code class="language-plaintext highlighter-rouge">IMetricsTracker</code>接口来记录连接相关的metrics</li>
+    </ul>
+  </li>
+</ul>
+
+<p>各模块主要的UML如下图所示：
+<img src="https://img-blog.csdnimg.cn/cda6db698ce34f23a69666d09ce60038.png" /></p>
+<h3 id="api">API</h3>
+<p><code class="language-plaintext highlighter-rouge">HikariDataSource</code>是HikariCP的核心api, 它实现了<code class="language-plaintext highlighter-rouge">DataSource</code>并且有2个构造器：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="c1">// fastPathPool由final修饰且可以被缓存，在带参构造器中被创建</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">HikariPool</span> <span class="n">fastPathPool</span><span class="o">;</span>
+   <span class="c1">// pool由volatile修饰，懒加载且每次都要从内存中读取</span>
+   <span class="kd">private</span> <span class="kd">volatile</span> <span class="nc">HikariPool</span> <span class="n">pool</span><span class="o">;</span>
+
+   <span class="c1">// 默认构造器，使用 setters 配置改连接池</span>
+   <span class="kd">public</span> <span class="nf">HikariDataSource</span><span class="o">()</span>
+   <span class="o">{</span>
+      <span class="c1">// HikariConfig构造器</span>
+      <span class="kd">super</span><span class="o">();</span>
+      <span class="c1">// 不带预加载连接池</span>
+      <span class="n">fastPathPool</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+   <span class="o">}</span>
+
+   <span class="kd">public</span> <span class="nf">HikariDataSource</span><span class="o">(</span><span class="nc">HikariConfig</span> <span class="n">configuration</span><span class="o">)</span>
+   <span class="o">{</span>
+      <span class="c1">// 验证并拷贝现在的池的配置</span>
+      <span class="n">configuration</span><span class="o">.</span><span class="na">validate</span><span class="o">();</span>
+      <span class="n">configuration</span><span class="o">.</span><span class="na">copyState</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+
+      <span class="no">LOGGER</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{} - Starting..."</span><span class="o">,</span> <span class="n">configuration</span><span class="o">.</span><span class="na">getPoolName</span><span class="o">());</span>
+      <span class="c1">// eager loading pool</span>
+      <span class="c1">// 预加载连接池</span>
+      <span class="n">pool</span> <span class="o">=</span> <span class="n">fastPathPool</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HikariPool</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+      <span class="no">LOGGER</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{} - Start completed."</span><span class="o">,</span> <span class="n">configuration</span><span class="o">.</span><span class="na">getPoolName</span><span class="o">());</span>
+   <span class="o">}</span>
+</code></pre></div></div>
+<p>默认构造器只能初始化基本的配置，需要通过<code class="language-plaintext highlighter-rouge">set()</code>方法配置其他参数，它使用懒加载方式创建<code class="language-plaintext highlighter-rouge">HikariPool</code>。相反，带参构造器会创建<code class="language-plaintext highlighter-rouge">fastPathPool</code>来直接使用（预加载）。</p>
+
+<p><code class="language-plaintext highlighter-rouge">HikariDataSource</code>实现了<code class="language-plaintext highlighter-rouge">DataSource</code>接口的<code class="language-plaintext highlighter-rouge">getConnection()</code>方法，并且从<code class="language-plaintext highlighter-rouge">fastPathPool</code>或<code class="language-plaintext highlighter-rouge">pool</code>中获取真实的连接：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="kd">public</span> <span class="nc">Connection</span> <span class="nf">getConnection</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">SQLException</span>
+   <span class="o">{</span>
+      <span class="c1">// 关闭的连接池不能再获取连接</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">isClosed</span><span class="o">())</span> <span class="o">{</span>
+         <span class="k">throw</span> <span class="k">new</span> <span class="nf">SQLException</span><span class="o">(</span><span class="s">"HikariDataSource "</span> <span class="o">+</span> <span class="k">this</span> <span class="o">+</span> <span class="s">" has been closed."</span><span class="o">);</span>
+      <span class="o">}</span>
+
+      <span class="c1">// 从预加载的fastPathPool中获取</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">fastPathPool</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+         <span class="k">return</span> <span class="n">fastPathPool</span><span class="o">.</span><span class="na">getConnection</span><span class="o">();</span>
+      <span class="o">}</span>
+
+      <span class="c1">// 从懒加载的pool中获取</span>
+      <span class="c1">// See http://en.wikipedia.org/wiki/Double-checked_locking#Usage_in_Java</span>
+      <span class="nc">HikariPool</span> <span class="n">result</span> <span class="o">=</span> <span class="n">pool</span><span class="o">;</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">result</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+         <span class="kd">synchronized</span> <span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">pool</span><span class="o">;</span>
+            <span class="c1">// 双重检查pool</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">result</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+               <span class="c1">// 验证配置</span>
+               <span class="n">validate</span><span class="o">();</span>
+               <span class="no">LOGGER</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{} - Starting..."</span><span class="o">,</span> <span class="n">getPoolName</span><span class="o">());</span>
+               <span class="k">try</span> <span class="o">{</span>
+                  <span class="c1">// 创建HikariPool实例</span>
+                  <span class="n">pool</span> <span class="o">=</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HikariPool</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+               <span class="o">}</span>
+               <span class="k">catch</span> <span class="o">(</span><span class="nc">PoolInitializationException</span> <span class="n">pie</span><span class="o">)</span> <span class="o">{</span>
+                  <span class="k">if</span> <span class="o">(</span><span class="n">pie</span><span class="o">.</span><span class="na">getCause</span><span class="o">()</span> <span class="k">instanceof</span> <span class="nc">SQLException</span><span class="o">)</span> <span class="o">{</span>
+                     <span class="k">throw</span> <span class="o">(</span><span class="nc">SQLException</span><span class="o">)</span> <span class="n">pie</span><span class="o">.</span><span class="na">getCause</span><span class="o">();</span>
+                  <span class="o">}</span>
+                  <span class="k">else</span> <span class="o">{</span>
+                     <span class="k">throw</span> <span class="n">pie</span><span class="o">;</span>
+                  <span class="o">}</span>
+               <span class="o">}</span>
+               <span class="no">LOGGER</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"{} - Start completed."</span><span class="o">,</span> <span class="n">getPoolName</span><span class="o">());</span>
+            <span class="o">}</span>
+         <span class="o">}</span>
+      <span class="o">}</span>
+      <span class="c1">// 从HikariPool中获取连接</span>
+      <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="na">getConnection</span><span class="o">();</span>
+   <span class="o">}</span>
+</code></pre></div></div>
+<p>我们从<code class="language-plaintext highlighter-rouge">fastPathPool</code>或<code class="language-plaintext highlighter-rouge">pool</code>中获取连接，<code class="language-plaintext highlighter-rouge">fastPathPool</code>可能比<code class="language-plaintext highlighter-rouge">pool</code>更快一点因为它可以被缓存，所以更建议用带参构造器初始化<code class="language-plaintext highlighter-rouge">HikariDataSource</code>.</p>
+
+<h3 id="pool">Pool</h3>
+<p><code class="language-plaintext highlighter-rouge">HikariPool</code>是主要的连接池类，为HikariCP提供基本的连接池行为。</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="cm">/* HikariPool主要字段 */</span>
+   <span class="c1">// LinkedBlockingQueue用于保存添加连接的任务</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Collection</span><span class="o">&lt;</span><span class="nc">Runnable</span><span class="o">&gt;</span> <span class="n">addConnectionQueue</span><span class="o">;</span>
+   <span class="c1">// 线程池用于执行添加连接的任务</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">ThreadPoolExecutor</span> <span class="n">addConnectionExecutor</span><span class="o">;</span>
+   <span class="c1">// 线程池用于执行关闭过期连接的任务</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">ThreadPoolExecutor</span> <span class="n">closeConnectionExecutor</span><span class="o">;</span>
+
+   <span class="c1">// connectionBag维护PoolEntry内部真实的连接</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">ConcurrentBag</span><span class="o">&lt;</span><span class="nc">PoolEntry</span><span class="o">&gt;</span> <span class="n">connectionBag</span><span class="o">;</span>
+
+   <span class="c1">// 线程池用于关闭和维护最少idle连接</span>
+   <span class="kd">private</span> <span class="nc">ScheduledExecutorService</span> <span class="n">houseKeepingExecutorService</span><span class="o">;</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">ConcurrentBag</code>是核心集合，并发维护连接池内所有连接。</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="cm">/* HikariPool主要字段 */</span>
+   <span class="c1">// sharedList所有线程都可以borrow的连接</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">CopyOnWriteArrayList</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">sharedList</span><span class="o">;</span>
+
+   <span class="c1">// threadList只能被当前线程borrow的连接</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">ThreadLocal</span><span class="o">&lt;</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;&gt;</span> <span class="n">threadList</span><span class="o">;</span>
+   <span class="c1">// listener 就是HikariPool实例</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">IBagStateListener</span> <span class="n">listener</span><span class="o">;</span>
+   <span class="c1">// 等待获取连接的数量</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">AtomicInteger</span> <span class="n">waiters</span><span class="o">;</span>
+
+   <span class="c1">// 阻塞队列保存PoolEntry实例</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">SynchronousQueue</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">handoffQueue</span><span class="o">;</span>
+</code></pre></div></div>
+
+<h4 id="获取连接-1">获取连接</h4>
+<p><code class="language-plaintext highlighter-rouge">HikariPool</code>用<code class="language-plaintext highlighter-rouge">getConnection()</code>方法获取连接，它从<code class="language-plaintext highlighter-rouge">connectionBag</code>中借已经存在的<code class="language-plaintext highlighter-rouge">PoolEntry</code>来获取连接：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="kd">public</span> <span class="nc">Connection</span> <span class="nf">getConnection</span><span class="o">(</span><span class="kd">final</span> <span class="kt">long</span> <span class="n">hardTimeout</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">SQLException</span>
+   <span class="o">{</span>
+      <span class="c1">// 限制请求的连接的最大数量</span>
+      <span class="n">suspendResumeLock</span><span class="o">.</span><span class="na">acquire</span><span class="o">();</span>
+      <span class="kd">final</span> <span class="kt">long</span> <span class="n">startTime</span> <span class="o">=</span> <span class="n">currentTime</span><span class="o">();</span>
+
+      <span class="k">try</span> <span class="o">{</span>
+         <span class="kt">long</span> <span class="n">timeout</span> <span class="o">=</span> <span class="n">hardTimeout</span><span class="o">;</span>
+         <span class="nc">PoolEntry</span> <span class="n">poolEntry</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+         <span class="k">try</span> <span class="o">{</span>
+            <span class="k">do</span> <span class="o">{</span>
+               <span class="c1">// 从connectionBag中借已经存在的PoolEntry</span>
+               <span class="n">poolEntry</span> <span class="o">=</span> <span class="n">connectionBag</span><span class="o">.</span><span class="na">borrow</span><span class="o">(</span><span class="n">timeout</span><span class="o">,</span> <span class="no">MILLISECONDS</span><span class="o">);</span>
+               <span class="k">if</span> <span class="o">(</span><span class="n">poolEntry</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                  <span class="k">break</span><span class="o">;</span> <span class="c1">// We timed out... break and throw exception</span>
+               <span class="o">}</span>
+
+               <span class="kd">final</span> <span class="kt">long</span> <span class="n">now</span> <span class="o">=</span> <span class="n">currentTime</span><span class="o">();</span>
+               <span class="c1">// 如果被除掉或长时间空闲，则关闭连接</span>
+               <span class="k">if</span> <span class="o">(</span><span class="n">poolEntry</span><span class="o">.</span><span class="na">isMarkedEvicted</span><span class="o">()</span> <span class="o">||</span> <span class="o">(</span><span class="n">elapsedMillis</span><span class="o">(</span><span class="n">poolEntry</span><span class="o">.</span><span class="na">lastAccessed</span><span class="o">,</span> <span class="n">now</span><span class="o">)</span> <span class="o">&gt;</span> <span class="no">ALIVE_BYPASS_WINDOW_MS</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">isConnectionAlive</span><span class="o">(</span><span class="n">poolEntry</span><span class="o">.</span><span class="na">connection</span><span class="o">)))</span> <span class="o">{</span>
+                  <span class="n">closeConnection</span><span class="o">(</span><span class="n">poolEntry</span><span class="o">,</span> <span class="s">"(connection is evicted or dead)"</span><span class="o">);</span> <span class="c1">// Throw away the dead connection (passed max age or failed alive test)</span>
+                  <span class="n">timeout</span> <span class="o">=</span> <span class="n">hardTimeout</span> <span class="o">-</span> <span class="n">elapsedMillis</span><span class="o">(</span><span class="n">startTime</span><span class="o">);</span>
+               <span class="o">}</span>
+               <span class="k">else</span> <span class="o">{</span>
+                  <span class="c1">// 从poolEntry中获取代理连接</span>
+                  <span class="n">metricsTracker</span><span class="o">.</span><span class="na">recordBorrowStats</span><span class="o">(</span><span class="n">poolEntry</span><span class="o">,</span> <span class="n">startTime</span><span class="o">);</span>
+                  <span class="k">return</span> <span class="n">poolEntry</span><span class="o">.</span><span class="na">createProxyConnection</span><span class="o">(</span><span class="n">leakTask</span><span class="o">.</span><span class="na">schedule</span><span class="o">(</span><span class="n">poolEntry</span><span class="o">),</span> <span class="n">now</span><span class="o">);</span>
+               <span class="o">}</span>
+            <span class="o">}</span> <span class="k">while</span> <span class="o">(</span><span class="n">timeout</span> <span class="o">&gt;</span> <span class="mi">0L</span><span class="o">);</span>
+
+            <span class="n">metricsTracker</span><span class="o">.</span><span class="na">recordBorrowTimeoutStats</span><span class="o">(</span><span class="n">startTime</span><span class="o">);</span>
+         <span class="o">}</span>
+         <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// 借poolEntry时报错，将它回收到池中</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">poolEntry</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+               <span class="n">poolEntry</span><span class="o">.</span><span class="na">recycle</span><span class="o">(</span><span class="n">startTime</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">interrupt</span><span class="o">();</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">SQLException</span><span class="o">(</span><span class="n">poolName</span> <span class="o">+</span> <span class="s">" - Interrupted during connection acquisition"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+         <span class="o">}</span>
+      <span class="o">}</span>
+      <span class="k">finally</span> <span class="o">{</span>
+         <span class="c1">// 释放semophore</span>
+         <span class="n">suspendResumeLock</span><span class="o">.</span><span class="na">release</span><span class="o">();</span>
+      <span class="o">}</span>
+
+      <span class="k">throw</span> <span class="nf">createTimeoutException</span><span class="o">(</span><span class="n">startTime</span><span class="o">);</span>
+   <span class="o">}</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">ConcurrentBag</code>提供<code class="language-plaintext highlighter-rouge">borrow()</code>方法从并发集合中获取<code class="language-plaintext highlighter-rouge">PoolEntry</code>元素，先尝试从<code class="language-plaintext highlighter-rouge">threadList</code>中获取，再尝试从<code class="language-plaintext highlighter-rouge">sharedList</code>中获取，如果还没有获取到，则尝试从<code class="language-plaintext highlighter-rouge">handoffQueue</code>中获取：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="kd">public</span> <span class="no">T</span> <span class="nf">borrow</span><span class="o">(</span><span class="kt">long</span> <span class="n">timeout</span><span class="o">,</span> <span class="kd">final</span> <span class="nc">TimeUnit</span> <span class="n">timeUnit</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">InterruptedException</span>
+   <span class="o">{</span>
+      <span class="c1">// Try the thread-local list first</span>
+      <span class="c1">// 先从thread-local里尝试获取</span>
+      <span class="kd">final</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="n">threadList</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+      <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">--)</span> <span class="o">{</span>
+         <span class="kd">final</span> <span class="nc">Object</span> <span class="n">entry</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+         <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">"unchecked"</span><span class="o">)</span>
+         <span class="kd">final</span> <span class="no">T</span> <span class="n">bagEntry</span> <span class="o">=</span> <span class="n">weakThreadLocals</span> <span class="o">?</span> <span class="o">((</span><span class="nc">WeakReference</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;)</span> <span class="n">entry</span><span class="o">).</span><span class="na">get</span><span class="o">()</span> <span class="o">:</span> <span class="o">(</span><span class="no">T</span><span class="o">)</span> <span class="n">entry</span><span class="o">;</span>
+         <span class="k">if</span> <span class="o">(</span><span class="n">bagEntry</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">bagEntry</span><span class="o">.</span><span class="na">compareAndSet</span><span class="o">(</span><span class="no">STATE_NOT_IN_USE</span><span class="o">,</span> <span class="no">STATE_IN_USE</span><span class="o">))</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">bagEntry</span><span class="o">;</span>
+         <span class="o">}</span>
+      <span class="o">}</span>
+
+      <span class="c1">// 否则，查看 shared list ... 然后从handoff队列中获取</span>
+      <span class="kd">final</span> <span class="kt">int</span> <span class="n">waiting</span> <span class="o">=</span> <span class="n">waiters</span><span class="o">.</span><span class="na">incrementAndGet</span><span class="o">();</span>
+      <span class="k">try</span> <span class="o">{</span>
+         <span class="k">for</span> <span class="o">(</span><span class="no">T</span> <span class="n">bagEntry</span> <span class="o">:</span> <span class="n">sharedList</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">bagEntry</span><span class="o">.</span><span class="na">compareAndSet</span><span class="o">(</span><span class="no">STATE_NOT_IN_USE</span><span class="o">,</span> <span class="no">STATE_IN_USE</span><span class="o">))</span> <span class="o">{</span>
+               <span class="c1">// 可能拿了别的等待者的连接，需要添加一个bag</span>
+               <span class="k">if</span> <span class="o">(</span><span class="n">waiting</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+                  <span class="c1">// listener是HikariPool实例</span>
+                  <span class="n">listener</span><span class="o">.</span><span class="na">addBagItem</span><span class="o">(</span><span class="n">waiting</span> <span class="o">-</span> <span class="mi">1</span><span class="o">);</span>
+               <span class="o">}</span>
+               <span class="k">return</span> <span class="n">bagEntry</span><span class="o">;</span>
+            <span class="o">}</span>
+         <span class="o">}</span>
+
+         <span class="n">listener</span><span class="o">.</span><span class="na">addBagItem</span><span class="o">(</span><span class="n">waiting</span><span class="o">);</span>
+
+         <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeUnit</span><span class="o">.</span><span class="na">toNanos</span><span class="o">(</span><span class="n">timeout</span><span class="o">);</span>
+         <span class="k">do</span> <span class="o">{</span>
+            <span class="kd">final</span> <span class="kt">long</span> <span class="n">start</span> <span class="o">=</span> <span class="n">currentTime</span><span class="o">();</span>
+            <span class="c1">// 从队列中获取bagEntry, 最长等待timtout时间</span>
+            <span class="kd">final</span> <span class="no">T</span> <span class="n">bagEntry</span> <span class="o">=</span> <span class="n">handoffQueue</span><span class="o">.</span><span class="na">poll</span><span class="o">(</span><span class="n">timeout</span><span class="o">,</span> <span class="no">NANOSECONDS</span><span class="o">);</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">bagEntry</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">bagEntry</span><span class="o">.</span><span class="na">compareAndSet</span><span class="o">(</span><span class="no">STATE_NOT_IN_USE</span><span class="o">,</span> <span class="no">STATE_IN_USE</span><span class="o">))</span> <span class="o">{</span>
+               <span class="k">return</span> <span class="n">bagEntry</span><span class="o">;</span>
+            <span class="o">}</span>
+
+            <span class="n">timeout</span> <span class="o">-=</span> <span class="n">elapsedNanos</span><span class="o">(</span><span class="n">start</span><span class="o">);</span>
+         <span class="o">}</span> <span class="k">while</span> <span class="o">(</span><span class="n">timeout</span> <span class="o">&gt;</span> <span class="mi">10_000</span><span class="o">);</span>
+
+         <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+      <span class="o">}</span>
+      <span class="k">finally</span> <span class="o">{</span>
+         <span class="n">waiters</span><span class="o">.</span><span class="na">decrementAndGet</span><span class="o">();</span>
+      <span class="o">}</span>
+   <span class="o">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">HikariPool</code>通过<code class="language-plaintext highlighter-rouge">connectionBag</code>将<code class="language-plaintext highlighter-rouge">poolEntry</code>回收到连接池中：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="kt">void</span> <span class="nf">recycle</span><span class="o">(</span><span class="kd">final</span> <span class="nc">PoolEntry</span> <span class="n">poolEntry</span><span class="o">)</span>
+   <span class="o">{</span>
+      <span class="n">metricsTracker</span><span class="o">.</span><span class="na">recordConnectionUsage</span><span class="o">(</span><span class="n">poolEntry</span><span class="o">);</span>
+
+      <span class="n">connectionBag</span><span class="o">.</span><span class="na">requite</span><span class="o">(</span><span class="n">poolEntry</span><span class="o">);</span>
+   <span class="o">}</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">ConcurrentBag</code>提供<code class="language-plaintext highlighter-rouge">requite()</code>方法将借来的poolEntry返回到集合中，如果有等待获取连接则直接将bagEntry放到<code class="language-plaintext highlighter-rouge">handoffQueue</code>中，否则把bagEntry放到<code class="language-plaintext highlighter-rouge">threadLocalList</code>中：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">requite</span><span class="o">(</span><span class="kd">final</span> <span class="no">T</span> <span class="n">bagEntry</span><span class="o">)</span>
+   <span class="o">{</span>
+      <span class="n">bagEntry</span><span class="o">.</span><span class="na">setState</span><span class="o">(</span><span class="no">STATE_NOT_IN_USE</span><span class="o">);</span>
+
+      <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">waiters</span><span class="o">.</span><span class="na">get</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+         <span class="c1">// 有等待连接的，直接把bagEntry放到handoffQueue中用于borrow</span>
+         <span class="k">if</span> <span class="o">(</span><span class="n">bagEntry</span><span class="o">.</span><span class="na">getState</span><span class="o">()</span> <span class="o">!=</span> <span class="no">STATE_NOT_IN_USE</span> <span class="o">||</span> <span class="n">handoffQueue</span><span class="o">.</span><span class="na">offer</span><span class="o">(</span><span class="n">bagEntry</span><span class="o">))</span> <span class="o">{</span>
+            <span class="k">return</span><span class="o">;</span>
+         <span class="o">}</span>
+         <span class="k">else</span> <span class="nf">if</span> <span class="o">((</span><span class="n">i</span> <span class="o">&amp;</span> <span class="mh">0x100</span><span class="o">)</span> <span class="o">==</span> <span class="mh">0x100</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">parkNanos</span><span class="o">(</span><span class="no">MICROSECONDS</span><span class="o">.</span><span class="na">toNanos</span><span class="o">(</span><span class="mi">10</span><span class="o">));</span>
+         <span class="o">}</span>
+         <span class="k">else</span> <span class="o">{</span>
+            <span class="n">yield</span><span class="o">();</span>
+         <span class="o">}</span>
+      <span class="o">}</span>
+
+      <span class="c1">// 没有等待着，将poolEntry返回到threadLocalList</span>
+      <span class="kd">final</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Object</span><span class="o">&gt;</span> <span class="n">threadLocalList</span> <span class="o">=</span> <span class="n">threadList</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+      <span class="n">threadLocalList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">weakThreadLocals</span> <span class="o">?</span> <span class="k">new</span> <span class="nc">WeakReference</span><span class="o">&lt;&gt;(</span><span class="n">bagEntry</span><span class="o">)</span> <span class="o">:</span> <span class="n">bagEntry</span><span class="o">);</span>
+   <span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="添加连接">添加连接</h4>
+<p><code class="language-plaintext highlighter-rouge">HikariPool</code>通过<code class="language-plaintext highlighter-rouge">addBagItem()</code>方法添加<code class="language-plaintext highlighter-rouge">PoolEntry</code>实例，它会提交一个<code class="language-plaintext highlighter-rouge">POOL_ENTRY_CREATOR</code>任务：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="kd">public</span> <span class="nc">Future</span><span class="o">&lt;</span><span class="nc">Boolean</span><span class="o">&gt;</span> <span class="nf">addBagItem</span><span class="o">(</span><span class="kd">final</span> <span class="kt">int</span> <span class="n">waiting</span><span class="o">)</span>
+   <span class="o">{</span>
+      <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">shouldAdd</span> <span class="o">=</span> <span class="n">waiting</span> <span class="o">-</span> <span class="n">addConnectionQueue</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">;</span> <span class="c1">// Yes, &gt;= is intentional.</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">shouldAdd</span><span class="o">)</span> <span class="o">{</span>
+         <span class="k">return</span> <span class="n">addConnectionExecutor</span><span class="o">.</span><span class="na">submit</span><span class="o">(</span><span class="no">POOL_ENTRY_CREATOR</span><span class="o">);</span>
+      <span class="o">}</span>
+
+      <span class="k">return</span> <span class="nc">CompletableFuture</span><span class="o">.</span><span class="na">completedFuture</span><span class="o">(</span><span class="nc">Boolean</span><span class="o">.</span><span class="na">TRUE</span><span class="o">);</span>
+   <span class="o">}</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">POOL_ENTRY_CREATOR</code>是一个<code class="language-plaintext highlighter-rouge">Callable&lt;Boolean&gt;</code>实例，<code class="language-plaintext highlighter-rouge">call()</code>方法用于向<code class="language-plaintext highlighter-rouge">connectionBag</code>添加<code class="language-plaintext highlighter-rouge">PoolEntry</code>实例：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="kd">public</span> <span class="nc">Boolean</span> <span class="nf">call</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span>
+      <span class="o">{</span>
+         <span class="kt">long</span> <span class="n">sleepBackoff</span> <span class="o">=</span> <span class="mi">250L</span><span class="o">;</span>
+         <span class="k">while</span> <span class="o">(</span><span class="n">poolState</span> <span class="o">==</span> <span class="no">POOL_NORMAL</span> <span class="o">&amp;&amp;</span> <span class="n">shouldCreateAnotherConnection</span><span class="o">())</span> <span class="o">{</span>
+            <span class="c1">// 创建新的PoolEntry实例</span>
+            <span class="kd">final</span> <span class="nc">PoolEntry</span> <span class="n">poolEntry</span> <span class="o">=</span> <span class="n">createPoolEntry</span><span class="o">();</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">poolEntry</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+               <span class="n">connectionBag</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">poolEntry</span><span class="o">);</span>
+               <span class="no">LOGGER</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"{} - Added connection {}"</span><span class="o">,</span> <span class="n">poolName</span><span class="o">,</span> <span class="n">poolEntry</span><span class="o">.</span><span class="na">connection</span><span class="o">);</span>
+               <span class="k">if</span> <span class="o">(</span><span class="n">loggingPrefix</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                  <span class="n">logPoolState</span><span class="o">(</span><span class="n">loggingPrefix</span><span class="o">);</span>
+               <span class="o">}</span>
+               <span class="k">return</span> <span class="nc">Boolean</span><span class="o">.</span><span class="na">TRUE</span><span class="o">;</span>
+            <span class="o">}</span>
+
+            <span class="c1">// 不能从数据库中获取连接，重试</span>
+            <span class="n">quietlySleep</span><span class="o">(</span><span class="n">sleepBackoff</span><span class="o">);</span>
+            <span class="n">sleepBackoff</span> <span class="o">=</span> <span class="nc">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="no">SECONDS</span><span class="o">.</span><span class="na">toMillis</span><span class="o">(</span><span class="mi">10</span><span class="o">),</span> <span class="nc">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">connectionTimeout</span><span class="o">,</span> <span class="o">(</span><span class="kt">long</span><span class="o">)</span> <span class="o">(</span><span class="n">sleepBackoff</span> <span class="o">*</span> <span class="mf">1.5</span><span class="o">)));</span>
+         <span class="o">}</span>
+         <span class="c1">// 连接池 suspend 或者关闭或者到了最大连接数</span>
+         <span class="k">return</span> <span class="nc">Boolean</span><span class="o">.</span><span class="na">FALSE</span><span class="o">;</span>
+      <span class="o">}</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">HikariPool</code>使用<code class="language-plaintext highlighter-rouge">createPoolEntry()</code>方法创建<code class="language-plaintext highlighter-rouge">PoolEntry</code>, 它会创建新的连接来构造PoolEntry，如果设置了连接的maxLifetime，还会配置任务来移除该连接：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="kd">private</span> <span class="nc">PoolEntry</span> <span class="nf">createPoolEntry</span><span class="o">()</span>
+   <span class="o">{</span>
+      <span class="k">try</span> <span class="o">{</span>
+         <span class="c1">// 用新的连接创建新的poolEntry</span>
+         <span class="kd">final</span> <span class="nc">PoolEntry</span> <span class="n">poolEntry</span> <span class="o">=</span> <span class="n">newPoolEntry</span><span class="o">();</span>
+
+         <span class="kd">final</span> <span class="kt">long</span> <span class="n">maxLifetime</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">getMaxLifetime</span><span class="o">();</span>
+         <span class="k">if</span> <span class="o">(</span><span class="n">maxLifetime</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// 方差最大为maxlifetime的2.5%</span>
+            <span class="kd">final</span> <span class="kt">long</span> <span class="n">variance</span> <span class="o">=</span> <span class="n">maxLifetime</span> <span class="o">&gt;</span> <span class="mi">10_000</span> <span class="o">?</span> <span class="nc">ThreadLocalRandom</span><span class="o">.</span><span class="na">current</span><span class="o">().</span><span class="na">nextLong</span><span class="o">(</span> <span class="n">maxLifetime</span> <span class="o">/</span> <span class="mi">40</span> <span class="o">)</span> <span class="o">:</span> <span class="mi">0</span><span class="o">;</span>
+            <span class="kd">final</span> <span class="kt">long</span> <span class="n">lifetime</span> <span class="o">=</span> <span class="n">maxLifetime</span> <span class="o">-</span> <span class="n">variance</span><span class="o">;</span>
+            <span class="c1">// 调度任务再lifetime之后执行移除连接</span>
+            <span class="n">poolEntry</span><span class="o">.</span><span class="na">setFutureEol</span><span class="o">(</span><span class="n">houseKeepingExecutorService</span><span class="o">.</span><span class="na">schedule</span><span class="o">(</span>
+               <span class="o">()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                  <span class="k">if</span> <span class="o">(</span><span class="n">softEvictConnection</span><span class="o">(</span><span class="n">poolEntry</span><span class="o">,</span> <span class="s">"(connection has passed maxLifetime)"</span><span class="o">,</span> <span class="kc">false</span> <span class="cm">/* not owner */</span><span class="o">))</span> <span class="o">{</span>
+                     <span class="c1">// 尝试添加PoolEntry因为当前连接被移除了</span>
+                     <span class="n">addBagItem</span><span class="o">(</span><span class="n">connectionBag</span><span class="o">.</span><span class="na">getWaitingThreadCount</span><span class="o">());</span>
+                  <span class="o">}</span>
+               <span class="o">},</span>
+               <span class="n">lifetime</span><span class="o">,</span> <span class="no">MILLISECONDS</span><span class="o">));</span>
+         <span class="o">}</span>
+
+         <span class="k">return</span> <span class="n">poolEntry</span><span class="o">;</span>
+      <span class="o">}</span>
+      <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+         <span class="k">if</span> <span class="o">(</span><span class="n">poolState</span> <span class="o">==</span> <span class="no">POOL_NORMAL</span><span class="o">)</span> <span class="o">{</span>
+            <span class="no">LOGGER</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"{} - Cannot acquire connection from data source"</span><span class="o">,</span> <span class="n">poolName</span><span class="o">,</span> <span class="o">(</span><span class="n">e</span> <span class="k">instanceof</span> <span class="nc">ConnectionSetupException</span> <span class="o">?</span> <span class="n">e</span><span class="o">.</span><span class="na">getCause</span><span class="o">()</span> <span class="o">:</span> <span class="n">e</span><span class="o">));</span>
+         <span class="o">}</span>
+         <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+      <span class="o">}</span>
+   <span class="o">}</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">ConcurrentBag</code>用<code class="language-plaintext highlighter-rouge">add()</code>方法把新建的PoolEntry加到bag里给其他人borrow, 它先把bagEntry加到<code class="language-plaintext highlighter-rouge">sharedList</code>中，如果现在有<code class="language-plaintext highlighter-rouge">waiters</code>则将bagEntry放到<code class="language-plaintext highlighter-rouge">handoffQueue</code>以供borrow:</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="kd">final</span> <span class="no">T</span> <span class="n">bagEntry</span><span class="o">)</span>
+   <span class="o">{</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">closed</span><span class="o">)</span> <span class="o">{</span>
+         <span class="no">LOGGER</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"ConcurrentBag has been closed, ignoring add()"</span><span class="o">);</span>
+         <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalStateException</span><span class="o">(</span><span class="s">"ConcurrentBag has been closed, ignoring add()"</span><span class="o">);</span>
+      <span class="o">}</span>
+
+      <span class="c1">// 将bagEntry加到sharedList中</span>
+      <span class="n">sharedList</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">bagEntry</span><span class="o">);</span>
+
+      <span class="c1">// 如果有等待连接的，自旋直到有一个线程需要bagEntry</span>
+      <span class="k">while</span> <span class="o">(</span><span class="n">waiters</span><span class="o">.</span><span class="na">get</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">handoffQueue</span><span class="o">.</span><span class="na">offer</span><span class="o">(</span><span class="n">bagEntry</span><span class="o">))</span> <span class="o">{</span>
+         <span class="n">yield</span><span class="o">();</span>
+      <span class="o">}</span>
+   <span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="维护连接">维护连接</h4>
+<p><code class="language-plaintext highlighter-rouge">HikariPool</code>用<code class="language-plaintext highlighter-rouge">HouseKeeper</code>关闭和维护最小空闲连接，它实现了<code class="language-plaintext highlighter-rouge">Runnable()</code>方法，如果设置了idleTimeout并且minimumIdle数量比maximunPoolSize小，则限制空闲超时的连接，为了避免改行为，<strong>可以不设置minimumIdle和idleTimeout</strong>。</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      <span class="c1">// 上次执行house keeping的时间戳</span>
+      <span class="kd">private</span> <span class="kd">volatile</span> <span class="kt">long</span> <span class="n">previous</span> <span class="o">=</span> <span class="n">plusMillis</span><span class="o">(</span><span class="n">currentTime</span><span class="o">(),</span> <span class="o">-</span><span class="no">HOUSEKEEPING_PERIOD_MS</span><span class="o">);</span>
+
+      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span>
+      <span class="o">{</span>
+         <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">// 更新超时时间以防其被改变</span>
+            <span class="n">connectionTimeout</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">getConnectionTimeout</span><span class="o">();</span>
+            <span class="n">validationTimeout</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">getValidationTimeout</span><span class="o">();</span>
+            <span class="n">leakTask</span><span class="o">.</span><span class="na">updateLeakDetectionThreshold</span><span class="o">(</span><span class="n">config</span><span class="o">.</span><span class="na">getLeakDetectionThreshold</span><span class="o">());</span>
+
+            <span class="kd">final</span> <span class="kt">long</span> <span class="n">idleTimeout</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">getIdleTimeout</span><span class="o">();</span>
+            <span class="kd">final</span> <span class="kt">long</span> <span class="n">now</span> <span class="o">=</span> <span class="n">currentTime</span><span class="o">();</span>
+
+            <span class="c1">// 检查逆向时间，根据NTP规范允许+128ms</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">plusMillis</span><span class="o">(</span><span class="n">now</span><span class="o">,</span> <span class="mi">128</span><span class="o">)</span> <span class="o">&lt;</span> <span class="n">plusMillis</span><span class="o">(</span><span class="n">previous</span><span class="o">,</span> <span class="no">HOUSEKEEPING_PERIOD_MS</span><span class="o">))</span> <span class="o">{</span>
+               <span class="c1">// 当前时间戳比预期小</span>
+               <span class="no">LOGGER</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"{} - Retrograde clock change detected (housekeeper delta={}), soft-evicting connections from pool."</span><span class="o">,</span>
+                           <span class="n">poolName</span><span class="o">,</span> <span class="n">elapsedDisplayString</span><span class="o">(</span><span class="n">previous</span><span class="o">,</span> <span class="n">now</span><span class="o">));</span>
+               <span class="n">previous</span> <span class="o">=</span> <span class="n">now</span><span class="o">;</span>
+               <span class="n">softEvictConnections</span><span class="o">();</span>
+               <span class="n">fillPool</span><span class="o">();</span>
+               <span class="k">return</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">now</span> <span class="o">&gt;</span> <span class="n">plusMillis</span><span class="o">(</span><span class="n">previous</span><span class="o">,</span> <span class="o">(</span><span class="mi">3</span> <span class="o">*</span> <span class="no">HOUSEKEEPING_PERIOD_MS</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">))</span> <span class="o">{</span>
+               <span class="c1">// 前向的时钟不需要移除连接，这只是加速了连接退出的时间</span>
+               <span class="no">LOGGER</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">"{} - Thread starvation or clock leap detected (housekeeper delta={})."</span><span class="o">,</span> <span class="n">poolName</span><span class="o">,</span> <span class="n">elapsedDisplayString</span><span class="o">(</span><span class="n">previous</span><span class="o">,</span> <span class="n">now</span><span class="o">));</span>
+            <span class="o">}</span>
+
+            <span class="n">previous</span> <span class="o">=</span> <span class="n">now</span><span class="o">;</span>
+
+            <span class="nc">String</span> <span class="n">afterPrefix</span> <span class="o">=</span> <span class="s">"Pool "</span><span class="o">;</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">idleTimeout</span> <span class="o">&gt;</span> <span class="mi">0L</span> <span class="o">&amp;&amp;</span> <span class="n">config</span><span class="o">.</span><span class="na">getMinimumIdle</span><span class="o">()</span> <span class="o">&lt;</span> <span class="n">config</span><span class="o">.</span><span class="na">getMaximumPoolSize</span><span class="o">())</span> <span class="o">{</span>
+               <span class="c1">// 关闭空闲超时的连接，如果空闲超时被设置</span>
+               <span class="c1">// 且minimumIdle比maximumPoolSize小</span>
+               <span class="n">logPoolState</span><span class="o">(</span><span class="s">"Before cleanup "</span><span class="o">);</span>
+               <span class="n">afterPrefix</span> <span class="o">=</span> <span class="s">"After cleanup  "</span><span class="o">;</span>
+
+               <span class="n">connectionBag</span>
+                  <span class="o">.</span><span class="na">values</span><span class="o">(</span><span class="no">STATE_NOT_IN_USE</span><span class="o">)</span>
+                  <span class="o">.</span><span class="na">stream</span><span class="o">()</span>
+                  <span class="o">.</span><span class="na">sorted</span><span class="o">(</span><span class="no">LASTACCESS_REVERSE_COMPARABLE</span><span class="o">)</span>
+                  <span class="o">.</span><span class="na">skip</span><span class="o">(</span><span class="n">config</span><span class="o">.</span><span class="na">getMinimumIdle</span><span class="o">())</span>
+                  <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">p</span> <span class="o">-&gt;</span> <span class="n">elapsedMillis</span><span class="o">(</span><span class="n">p</span><span class="o">.</span><span class="na">lastAccessed</span><span class="o">,</span> <span class="n">now</span><span class="o">)</span> <span class="o">&gt;</span> <span class="n">idleTimeout</span><span class="o">)</span>
+                  <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="nl">connectionBag:</span><span class="o">:</span><span class="n">reserve</span><span class="o">)</span>
+                  <span class="o">.</span><span class="na">forEachOrdered</span><span class="o">(</span><span class="n">p</span> <span class="o">-&gt;</span> <span class="n">closeConnection</span><span class="o">(</span><span class="n">p</span><span class="o">,</span> <span class="s">"(connection has passed idleTimeout)"</span><span class="o">));</span>
+            <span class="o">}</span>
+
+            <span class="n">logPoolState</span><span class="o">(</span><span class="n">afterPrefix</span><span class="o">);</span>
+
+            <span class="n">fillPool</span><span class="o">();</span> <span class="c1">// 尝试维护最小连接数量</span>
+         <span class="o">}</span>
+         <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="no">LOGGER</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"Unexpected exception in housekeeping task"</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+         <span class="o">}</span>
+      <span class="o">}</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">HikariPool</code>提供<code class="language-plaintext highlighter-rouge">fillPool()</code>方法维护最小空闲连接数量，它会计算需要添加的连接数并且提交<code class="language-plaintext highlighter-rouge">POOL_ENTRY_CREATOR</code>的任务：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="kd">private</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">fillPool</span><span class="o">()</span>
+   <span class="o">{</span>
+      <span class="kd">final</span> <span class="kt">int</span> <span class="n">connectionsToAdd</span> <span class="o">=</span> <span class="nc">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">config</span><span class="o">.</span><span class="na">getMaximumPoolSize</span><span class="o">()</span> <span class="o">-</span> <span class="n">getTotalConnections</span><span class="o">(),</span> <span class="n">config</span><span class="o">.</span><span class="na">getMinimumIdle</span><span class="o">()</span> <span class="o">-</span> <span class="n">getIdleConnections</span><span class="o">())</span>
+                                   <span class="o">-</span> <span class="n">addConnectionQueue</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+      <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">connectionsToAdd</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+         <span class="n">addConnectionExecutor</span><span class="o">.</span><span class="na">submit</span><span class="o">((</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">connectionsToAdd</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span> <span class="o">?</span> <span class="no">POOL_ENTRY_CREATOR</span> <span class="o">:</span> <span class="no">POST_FILL_POOL_ENTRY_CREATOR</span><span class="o">);</span>
+      <span class="o">}</span>
+   <span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="metrics">metrics</h3>
+<p><code class="language-plaintext highlighter-rouge">HikariCP</code>提供dropwizard和prometheus两种metrics, 顶层接口<code class="language-plaintext highlighter-rouge">MetricsTrackerFactory</code> 用于创建<code class="language-plaintext highlighter-rouge">IMetricsTracker</code>, 后者用于记录连接的创建，获取，使用和超时情况。</p>
+
+<h4 id="dropwizard">dropwizard</h4>
+<p><code class="language-plaintext highlighter-rouge">CodahaleMetricsTrackerFactory</code>创建<code class="language-plaintext highlighter-rouge">CodaHaleMetricsTracker</code>实例，它保存了以下metrics:</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">String</span> <span class="n">poolName</span><span class="o">;</span>
+   <span class="c1">// 相关的metrics</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Timer</span> <span class="n">connectionObtainTimer</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Histogram</span> <span class="n">connectionUsage</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Histogram</span> <span class="n">connectionCreation</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Meter</span> <span class="n">connectionTimeoutMeter</span><span class="o">;</span>
+   <span class="c1">// registry用于注册metrics</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">MetricRegistry</span> <span class="n">registry</span><span class="o">;</span>
+
+   <span class="c1">// 其他metrics的名称</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">METRIC_CATEGORY</span> <span class="o">=</span> <span class="s">"pool"</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">METRIC_NAME_WAIT</span> <span class="o">=</span> <span class="s">"Wait"</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">METRIC_NAME_USAGE</span> <span class="o">=</span> <span class="s">"Usage"</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">METRIC_NAME_CONNECT</span> <span class="o">=</span> <span class="s">"ConnectionCreation"</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">METRIC_NAME_TIMEOUT_RATE</span> <span class="o">=</span> <span class="s">"ConnectionTimeoutRate"</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">METRIC_NAME_TOTAL_CONNECTIONS</span> <span class="o">=</span> <span class="s">"TotalConnections"</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">METRIC_NAME_IDLE_CONNECTIONS</span> <span class="o">=</span> <span class="s">"IdleConnections"</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">METRIC_NAME_ACTIVE_CONNECTIONS</span> <span class="o">=</span> <span class="s">"ActiveConnections"</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">METRIC_NAME_PENDING_CONNECTIONS</span> <span class="o">=</span> <span class="s">"PendingConnections"</span><span class="o">;</span>
+</code></pre></div></div>
+
+<h4 id="prometheus">prometheus</h4>
+<p><code class="language-plaintext highlighter-rouge">PrometheusMetricsTrackerFactory</code>创建<code class="language-plaintext highlighter-rouge">PrometheusMetricsTracker</code>实例，它保存了以下metrics:</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="c1">// hikaricp_connection_timeout_count{poolName}</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Counter</span><span class="o">.</span><span class="na">Child</span> <span class="n">connectionTimeoutCounter</span><span class="o">;</span>
+   <span class="c1">// hikaricp_connection_acquired_nanos{poolName}</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Summary</span><span class="o">.</span><span class="na">Child</span> <span class="n">elapsedAcquiredSummary</span><span class="o">;</span>
+   <span class="c1">// hikaricp_connection_usage_millis{poolName}</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Summary</span><span class="o">.</span><span class="na">Child</span> <span class="n">elapsedBorrowedSummary</span><span class="o">;</span>
+   <span class="c1">// hikaricp_connection_creation_millis{poolName}</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Summary</span><span class="o">.</span><span class="na">Child</span> <span class="n">elapsedCreationSummary</span><span class="o">;</span>
+
+   <span class="c1">// hikaricp_connection_timeout_count</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Counter</span> <span class="n">ctCounter</span><span class="o">;</span>
+   <span class="c1">// hikaricp_connection_acquired_nanos</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Summary</span> <span class="n">eaSummary</span><span class="o">;</span>
+   <span class="c1">// hikaricp_connection_usage_millis</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Summary</span> <span class="n">ebSummary</span><span class="o">;</span>
+   <span class="c1">// hikaricp_connection_creation_millis</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Summary</span> <span class="n">ecSummary</span><span class="o">;</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Collector</span> <span class="n">collector</span><span class="o">;</span>
+</code></pre></div></div>
+
+<h2 id="最佳实践">最佳实践</h2>
+<p>有一些HikariCP的最佳实践：</p>
+<ul>
+  <li><strong>通过<code class="language-plaintext highlighter-rouge">HikariDataSource(HikariConfig config)</code>构造器创建<code class="language-plaintext highlighter-rouge">HikariDataSource</code></strong> <br />
+它会检查配置并且提前初始化连接池，且<code class="language-plaintext highlighter-rouge">fastPathPool</code>可以被缓存获得更好的性能。</li>
+  <li><strong>以固定大小的池运行</strong> <br />
+不设置<code class="language-plaintext highlighter-rouge">minimumIdle</code>和<code class="language-plaintext highlighter-rouge">idleTimeout</code>，然后连接池不需要关闭长时间空闲的连接。</li>
+  <li><strong>配置合理的<code class="language-plaintext highlighter-rouge">maximumPoolSize</code></strong> <br />
+主要取决于处理请求的QPS，每条请求的处理时间以及数据库服务器的CPU核心数。</li>
+</ul>
+
+      </div>
+    </section>
+    <footer class="post-meta">
+      <!-- Category -->
+      
+      
+      
+      <span>
+        <svg class="icon" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <title>Categories</title>
+          <g id="Iconly/Bold/Category" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+            <g id="Category" transform="translate(2.000000, 2.000000)" fill="#200E32" fill-rule="nonzero">
+              <path d="M5.9199,11.4697 C7.3299,11.4697 8.4599,12.6107 8.4599,14.0307 L8.4599,14.0307 L8.4599,17.4397 C8.4599,18.8497 7.3299,19.9997 5.9199,19.9997 L5.9199,19.9997 L2.5399,19.9997 C1.1399,19.9997 -0.0001,18.8497 -0.0001,17.4397 L-0.0001,17.4397 L-0.0001,14.0307 C-0.0001,12.6107 1.1399,11.4697 2.5399,11.4697 L2.5399,11.4697 Z M17.46,11.4697 C18.86,11.4697 20,12.6107 20,14.0307 L20,14.0307 L20,17.4397 C20,18.8497 18.86,19.9997 17.46,19.9997 L17.46,19.9997 L14.08,19.9997 C12.67,19.9997 11.54,18.8497 11.54,17.4397 L11.54,17.4397 L11.54,14.0307 C11.54,12.6107 12.67,11.4697 14.08,11.4697 L14.08,11.4697 Z M5.9199,-9.32587341e-14 C7.3299,-9.32587341e-14 8.4599,1.15 8.4599,2.561 L8.4599,2.561 L8.4599,5.97 C8.4599,7.39 7.3299,8.53 5.9199,8.53 L5.9199,8.53 L2.5399,8.53 C1.1399,8.53 -0.0001,7.39 -0.0001,5.97 L-0.0001,5.97 L-0.0001,2.561 C-0.0001,1.15 1.1399,-9.32587341e-14 2.5399,-9.32587341e-14 L2.5399,-9.32587341e-14 Z M17.46,-9.32587341e-14 C18.86,-9.32587341e-14 20,1.15 20,2.561 L20,2.561 L20,5.97 C20,7.39 18.86,8.53 17.46,8.53 L17.46,8.53 L14.08,8.53 C12.67,8.53 11.54,7.39 11.54,5.97 L11.54,5.97 L11.54,2.561 C11.54,1.15 12.67,-9.32587341e-14 14.08,-9.32587341e-14 L14.08,-9.32587341e-14 Z"></path>
+            </g>
+          </g>
+        </svg>
+        <strong>
+          分类
+        </strong>
+        <span>
+        
+          
+          
+          <a href="/zh/categories#%E6%95%B0%E6%8D%AE%E5%BA%93" rel="category">数据库</a>
+        
+        </span>
+      </span>
+      
+
+      <!-- Tag -->
+      
+
+      
+      
+      <span class="span-divider"></span>
+      <span class="page__taxonomy">
+        <svg class="icon" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+          <title>tags</title>
+          <defs></defs>
+          <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+            <g id="icon-146-tag" sketch:type="MSArtboardGroup" fill="#000000">
+              <path d="M12,4 L3.99961498,4 C2.89525812,4 2,4.88743329 2,5.99961498 L2,14 L15.3809027,27.3809027 C16.1646418,28.1646418 17.433119,28.1668566 18.2115341,27.3884415 L25.3884415,20.2115341 C26.168017,19.4319586 26.1640508,18.1640508 25.3809027,17.3809027 L12,4 L12,4 Z M7.5,11 C8.32842717,11 9,10.3284272 9,9.5 C9,8.67157283 8.32842717,8 7.5,8 C6.67157283,8 6,8.67157283 6,9.5 C6,10.3284272 6.67157283,11 7.5,11 L7.5,11 Z" id="tag" sketch:type="MSShapeGroup"></path>
+            </g>
+          </g>
+        </svg>
+        <strong>
+          标签
+        </strong>
+        <span>
+        
+          
+          
+          <a href="/zh/tags#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E6%B1%A0" rel="tag">数据库连接池</a>
+        
+        </span>
+      </span>
+      
+    </footer>
+  </div>
+</article>
+
+  </div>
+  <div class="back-to-top-wrapper">
+    <a href="#content" class="back-to-top-link">
+      <svg class="icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M27.6801 48.7299L31.1601 52.11L34.4801 51.57L35.9801 48.2L36.8401 33.68L40.0001 31.2099L45.8901 35.5499L49.7001 35.93L52.3801 33.52L51.5701 30.2999L33.7301 12.2H29.6601L11.8801 30.95L12.4601 34.91L17.1801 36.4599L22.9601 31.11L27.4601 32.7099L27.6801 48.7299Z" fill="#78B9EB"/>
+      <path d="M32 2.75C26.2149 2.75 20.5597 4.46548 15.7496 7.67951C10.9394 10.8935 7.1904 15.4618 4.97654 20.8065C2.76267 26.1512 2.18343 32.0324 3.31204 37.7064C4.44066 43.3803 7.22645 48.5922 11.3171 52.6829C15.4078 56.7736 20.6197 59.5594 26.2936 60.688C31.9676 61.8166 37.8488 61.2373 43.1935 59.0235C48.5382 56.8096 53.1065 53.0606 56.3205 48.2504C59.5345 43.4403 61.25 37.7851 61.25 32C61.2421 24.2449 58.1578 16.8096 52.6741 11.3259C47.1904 5.84218 39.7552 2.75794 32 2.75V2.75ZM32 58.75C26.7094 58.75 21.5375 57.1811 17.1385 54.2418C12.7395 51.3025 9.31088 47.1247 7.28624 42.2368C5.26159 37.3489 4.73185 31.9703 5.76401 26.7813C6.79616 21.5923 9.34385 16.8259 13.0849 13.0849C16.826 9.34384 21.5924 6.79615 26.7813 5.76399C31.9703 4.73184 37.3489 5.26158 42.2368 7.28622C47.1247 9.31087 51.3025 12.7395 54.2418 17.1385C57.1812 21.5375 58.75 26.7093 58.75 32C58.7421 39.0921 55.9212 45.8915 50.9063 50.9063C45.8915 55.9212 39.0921 58.7421 32 58.75V58.75Z" fill="#006DF0"/>
+      <path d="M51.6999 28.3301L35.6999 12.3301C35.2131 11.842 34.6349 11.4549 33.9983 11.1907C33.3616 10.9265 32.6792 10.7905 31.9899 10.7905C31.3006 10.7905 30.6181 10.9265 29.9815 11.1907C29.3449 11.4549 28.7667 11.842 28.2799 12.3301L12.2799 28.3301C11.2959 29.3153 10.7437 30.6511 10.7446 32.0436C10.7451 32.7331 10.8814 33.4157 11.1456 34.0525C11.4099 34.6893 11.797 35.2679 12.2849 35.7551C12.7728 36.2423 13.3518 36.6286 13.989 36.892C14.6261 37.1554 15.309 37.2908 15.9984 37.2903C17.3909 37.2894 18.7259 36.7353 19.7099 35.7501L22.0399 33.4201C22.4251 33.0367 22.9152 32.776 23.4483 32.671C23.9815 32.5659 24.5339 32.6212 25.0357 32.8299C25.5375 33.0385 25.9662 33.3911 26.2677 33.8432C26.5693 34.2953 26.7301 34.8266 26.7299 35.3701V48.0001C26.7299 49.3924 27.283 50.7278 28.2676 51.7124C29.2522 52.6969 30.5875 53.2501 31.9799 53.2501C33.3723 53.2501 34.7076 52.6969 35.6922 51.7124C36.6768 50.7278 37.2299 49.3924 37.2299 48.0001V35.3701C37.2297 34.8266 37.3905 34.2953 37.6921 33.8432C37.9936 33.3911 38.4223 33.0385 38.9241 32.8299C39.4259 32.6212 39.9783 32.5659 40.5114 32.671C41.0446 32.776 41.5347 33.0367 41.9199 33.4201L44.2499 35.7501C45.2339 36.7353 46.5689 37.2894 47.9614 37.2903C49.3538 37.2913 50.6896 36.739 51.6749 35.7551C52.6602 34.7711 53.2142 33.436 53.2152 32.0436C53.2161 30.6511 52.6639 29.3153 51.6799 28.3301H51.6999ZM49.9299 34.0001C49.4036 34.5114 48.6987 34.7974 47.9649 34.7974C47.2311 34.7974 46.5262 34.5114 45.9999 34.0001L43.6699 31.6701C42.9373 30.9223 41.9979 30.4106 40.9723 30.2007C39.9467 29.9908 38.8817 30.0923 37.9143 30.4922C36.9468 30.8921 36.121 31.5721 35.5428 32.4448C34.9647 33.3176 34.6607 34.3432 34.6699 35.3901V48.0001C34.6699 48.7294 34.3802 49.4289 33.8644 49.9446C33.3487 50.4603 32.6492 50.7501 31.9199 50.7501C31.1906 50.7501 30.4911 50.4603 29.9754 49.9446C29.4596 49.4289 29.1699 48.7294 29.1699 48.0001V35.3701C29.1891 34.3369 28.897 33.3219 28.3316 32.457C27.7663 31.592 26.9539 30.9171 25.9999 30.5201C25.3669 30.2511 24.6876 30.1085 23.9999 30.1001C22.6163 30.1086 21.2927 30.6661 20.3199 31.6501L17.9999 34.0001C17.4841 34.5159 16.7844 34.8057 16.0549 34.8057C15.3254 34.8057 14.6257 34.5159 14.1099 34.0001C13.5941 33.4842 13.3043 32.7846 13.3043 32.0551C13.3043 31.3255 13.5941 30.6259 14.1099 30.1101L30.1099 14.1101C30.6314 13.6089 31.3266 13.3291 32.0499 13.3291C32.7732 13.3291 33.4684 13.6089 33.9899 14.1101L49.9899 30.1101C50.4956 30.635 50.7731 31.3386 50.7618 32.0674C50.7506 32.7962 50.4515 33.491 49.9299 34.0001Z" fill="#006DF0"/>
+      </svg>
+    </a>
+  </div>
+</div>
+
+
+    <link rel="stylesheet" href="/assets/css/footer.css">
+<script src="/assets/js/footer.js"></script>
+
+<div class="footer-container">
+  <footer id="footer" class="main-width">
+    <div id="visitor-line">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 83.78" style="enable-background:new 0 0 122.88 83.78" xml:space="preserve">
+        <g>
+          <path d="M95.73,10.81c10.53,7.09,19.6,17.37,26.48,29.86l0.67,1.22l-0.67,1.21c-6.88,12.49-15.96,22.77-26.48,29.86 C85.46,79.88,73.8,83.78,61.44,83.78c-12.36,0-24.02-3.9-34.28-10.81C16.62,65.87,7.55,55.59,0.67,43.1L0,41.89l0.67-1.22 c6.88-12.49,15.95-22.77,26.48-29.86C37.42,3.9,49.08,0,61.44,0C73.8,0,85.45,3.9,95.73,10.81L95.73,10.81z M60.79,22.17l4.08,0.39 c-1.45,2.18-2.31,4.82-2.31,7.67c0,7.48,5.86,13.54,13.1,13.54c2.32,0,4.5-0.62,6.39-1.72c0.03,0.47,0.05,0.94,0.05,1.42 c0,11.77-9.54,21.31-21.31,21.31c-11.77,0-21.31-9.54-21.31-21.31C39.48,31.71,49.02,22.17,60.79,22.17L60.79,22.17L60.79,22.17z M109,41.89c-5.5-9.66-12.61-17.6-20.79-23.11c-8.05-5.42-17.15-8.48-26.77-8.48c-9.61,0-18.71,3.06-26.76,8.48 c-8.18,5.51-15.29,13.45-20.8,23.11c5.5,9.66,12.62,17.6,20.8,23.1c8.05,5.42,17.15,8.48,26.76,8.48c9.62,0,18.71-3.06,26.77-8.48 C96.39,59.49,103.5,51.55,109,41.89L109,41.89z"/>
+        </g>
+      </svg>
+      <span id="busuanzi_container_site_pv">Views: <span id="busuanzi_value_site_pv"></span></span>
+      <span class="span-divider">|</span>
+      <svg class="icon" style="height: 1.3em;" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24">
+        <path d="M18,19v-2c0.45-0.223,1.737-1.755,1.872-2.952c0.354-0.027,0.91-0.352,1.074-1.635c0.088-0.689-0.262-1.076-0.474-1.198 c0,0,0.528-1.003,0.528-2.214c0-2.428-0.953-4.5-3-4.5c0,0-0.711-1.5-3-1.5c-4.242,0-6,2.721-6,6c0,1.104,0.528,2.214,0.528,2.214 c-0.212,0.122-0.562,0.51-0.474,1.198c0.164,1.283,0.72,1.608,1.074,1.635C10.263,15.245,11.55,16.777,12,17v2c-1,3-9,1-9,8h24 C27,20,19,22,18,19z"/>
+      </svg>
+      <span id="busuanzi_container_site_uv">Visitors: <span id="busuanzi_value_site_uv"></span></span>
+    </div>
+
+    <div id="powered-list">
+      Powered by
+      <ul>
+        <li>
+          <a href="https://jekyllrb.com">Jekyll</a>
+        </li>
+        <li>
+          <a href="https://leo3418.github.io/">leo3418</a>
+        </li>
+        <li>
+          <a href="https://github.com/untra/polyglot/">polyglot</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+    </div>
+  </footer>
+</div>
+
+  </body>
+</html>

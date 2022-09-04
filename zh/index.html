@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" type="image/jpg" href="/assets/img/avatar.jpeg">
+
+<title>
+  
+    首页 - 伟强的博客
+  
+</title>
+
+<!-- style all pages needs -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<script src="/assets/js/utils.js"></script>
+<script src="/assets/js/jquery-3.6.0.min.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  </head>
+
+  <body>
+    <script>
+// searchIndex store all posts information in active_lang and can be used in header.js directly
+
+var searchIndex = [
+  
+    
+    
+    {
+      date: {
+        human: "16 January 2022",
+        machine: "2022-01-16"
+      },
+      excerpt: `HikariCP是一个快速，简单可靠的JDBC连接池，SpringBoot2.0开始默认使用该数据库连接池。JDBC连接池是一种管理多连接请求的机制，换句话说，它对数据库连接进行缓存，促使连接的重用。`,
+      title: "HikariCP源码分析",
+      url: "/zh/2022/01/16/database-hikaricp.html",
+      serial: ""
+    },
+  
+    
+    
+    {
+      date: {
+        human: " 3 October 2021",
+        machine: "2021-10-03"
+      },
+      excerpt: `Security Shell Protocal (SSH)是一种网络协议，旨在为不安全的网络提供安全的加密通信。SSH应用基于客户端/服务端架构，SSH客户端用于登录远程机器（SSH服务器）并在远程机器上执行命令。
+最常见的SSH应用包括：
+
+  SSH远程登录
+  任意TCP端口转发`,
+      title: "SSH远程登录和TCP端口转发",
+      url: "/zh/2021/10/03/ssh-remote-login-and-tcp-forwarding.html",
+      serial: ""
+    },
+  
+    
+    
+    {
+      date: {
+        human: "18 September 2021",
+        machine: "2021-09-18"
+      },
+      excerpt: `Hive DDL语句主要和database/schema, table/view, function等有关，全部的操作可以查看Hive Confluence, 包括：
+
+  CREATE DATABASE/SCHEMA, TABLE, VIEW, FUNCTION, INDEX
+  DROP DATABASE/SCHEMA, TABLE, VIEW, INDEX
+  TRUNCATE TABLE
+  ALTER DATABASE/SCHEMA, TABLE, VIEW
+  MSCK REPAIR TABLE (or ALTER TABLE RECOVER PARTITIONS)
+  SHOW DATABASES/SCHEMAS, TABLES, TBLPROPERTIES, VIEWS, PARTITIONS, FUNCTIONS, INDEX[ES], COLUMNS, CREATE TABLE
+  DESCRIBE database/schema, table, view`,
+      title: "Hive系列(2) - Hive数据定义操作(DDL)",
+      url: "/zh/2021/09/18/hive-serial-2-hive-data-definition-operation.html",
+      serial: "Hive系列文章"
+    },
+  
+    
+    
+    {
+      date: {
+        human: "11 September 2021",
+        machine: "2021-09-11"
+      },
+      excerpt: `Apache Hive™是一个基于Apache Hadoop™的数据仓库设施，便于读、写和管理分布式存储中的大型数据集,并通过SQL语法查询数据。`,
+      title: "Hive系列(1) - Hive介绍",
+      url: "/zh/2021/09/11/hive-serial-1-introduction-to-hive.html",
+      serial: "Hive系列文章"
+    },
+  
+    
+    
+    {
+      date: {
+        human: " 3 August 2021",
+        machine: "2021-08-03"
+      },
+      excerpt: `find程序递归向下遍历每个路径的目录树，对树中每个文件计算表达式。基本用法：
+find [options] path [expression]`,
+      title: "find - 遍历文件结构",
+      url: "/zh/2021/08/03/find-walk-a-file-hierarchy.html",
+      serial: ""
+    }
+  
+  ];
+</script>
+
+<link rel="stylesheet" href="/assets/css/header.css">
+
+<div class="header-container">
+  <!-- header component -->
+  <div id="header">
+    <div id="header-wrap" class="main-width">
+      <div class="header-menu">
+        <nav id="site-nav" class="greedy-nav">
+          <a class="site-title" href="/zh/">
+            伟强的博客
+          </a>
+          <div id="nav-placeholder"></div>
+          <!-- navigation menu -->
+          <ul id="nav-menu" class="visible-links hidden">
+            
+              <li>
+                <a href="/zh/tags">标签</a>
+              </li>
+            
+              <li>
+                <a href="/zh/categories">分类</a>
+              </li>
+            
+              <li>
+                <a href="/zh/about">关于</a>
+              </li>
+            
+          </ul>
+          <!-- navigation in button -->
+          <button id="nav-toggle" class="toggle-button hidden" type="button">
+            <svg class="icon" fill="none" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24">
+              <path d="M 2 5 L 2 7 L 22 7 L 22 5 L 2 5 z M 2 11 L 2 13 L 22 13 L 22 11 L 2 11 z M 2 17 L 2 19 L 22 19 L 22 17 L 2 17 z"/>
+            </svg>
+          </button>
+          <ul id="toggle-menu" class="floating-menu drop-down hidden">
+            
+              <li>
+                <a href="/zh/tags">标签</a>
+              </li>
+            
+              <li>
+                <a href="/zh/categories">分类</a>
+              </li>
+            
+              <li>
+                <a href="/zh/about">关于</a>
+              </li>
+            
+          </ul>
+
+          <!-- language toggle -->
+          <button id="language-toggle-button" class="toggle-button" type="button">
+            <svg class="icon" fill="none" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+              <path d="M54.22424,84.1345a79.93034,79.93034,0,0,0,9.75452,16.547,80.11705,80.11705,0,0,0,9.78468-16.547C67.27032,83.83522,60.71736,83.83522,54.22424,84.1345Z"/>
+              <path d="M31.214,86.40867a40.29838,40.29838,0,0,0,22.65121,15.73914,83.13981,83.13981,0,0,1-9.15639-17.3551C40.19069,85.18175,35.67239,85.72029,31.214,86.40867Z"/>
+              <path d="M26.63579,48.7064a39.78148,39.78148,0,0,0,0,29.2342c5.17651-.86769,10.38312-1.55606,15.44-2.0647a58.36749,58.36749,0,0,1,0-25.13478C36.98894,50.2624,31.8123,49.57427,26.63579,48.7064Z"/>
+              <path d="M51.232,75.18778q6.3734-.35919,12.74673-.35906c4.2791,0,8.528.1196,12.7769.35906a49.84143,49.84143,0,0,0,0-23.75835,213.654,213.654,0,0,1-25.52363,0A49.84269,49.84269,0,0,0,51.232,75.18778Z"/>
+              <path d="M101.35189,77.9406a40.18364,40.18364,0,0,0,0-29.2342c-5.17663.86787-10.38312,1.556-15.44,2.03472a58.37343,58.37343,0,0,1,0,25.13478C90.96877,76.38454,96.17526,77.07291,101.35189,77.9406Z"/>
+              <path d="M74.09252,24.49932a81.92266,81.92266,0,0,1,9.18618,17.355c4.51829-.389,9.03659-.95756,13.495-1.61578A40.36606,40.36606,0,0,0,74.09252,24.49932Z"/>
+              <path d="M73.76344,42.51243a79.34932,79.34932,0,0,0-9.78468-16.54692,79.16673,79.16673,0,0,0-9.75452,16.54692C60.71736,42.81178,67.27032,42.81178,73.76344,42.51243Z"/>
+              <path d="M13.08975,42.2107a3.51727,3.51727,0,0,0,4.07735-.23788c1.16892-.98559,1.68686-2.81907,2.20039-4.197l1.85724-4.988H37.03727l1.85717,4.88169c.68435,1.7952,1.518,4.46337,3.63559,4.96968a3.90555,3.90555,0,0,0,4.77479-3.51059,12.61677,12.61677,0,0,0-1.19394-4.16528L35.94949,9.86493a24.56261,24.56261,0,0,0-2.26588-5.03912c-1.45-2.10995-4.24742-2.19995-6.6383-1.33477-2.87846,1.04158-3.7283,4.53011-4.7328,7.08012-.00679.01729-9.94916,24.60447-9.94916,24.60447C11.40962,37.53924,10.38149,40.58311,13.08975,42.2107ZM29.05143,11.47316l5.86338,15.39825H23.2942Z"/>
+              <path d="M112.23907,97.94689a3.02125,3.02125,0,1,0,0-6.0425h-20.182l.34315-3.82087a3.02155,3.02155,0,0,0-6.01893-.53993l-.39167,4.3608h-6.89a3.02125,3.02125,0,1,0,0,6.0425h6.34712L84.493,108.56564a3.01874,3.01874,0,0,0,.66978,2.18184,33.3858,33.3858,0,0,0,4.9226,4.59718,27.70117,27.70117,0,0,1-12.57761,4.14058,3.02141,3.02141,0,0,0,.267,6.03075c.09,0,.18144-.0044.27288-.01182A32.95306,32.95306,0,0,0,95.526,118.94072c4.24479,2.36386,9.73359,5.13522,16.42833,5.76792q.146.01329.28766.01326a3.02134,3.02134,0,0,0,.28181-6.02924c-4.82732-.45641-8.91134-2.50326-12.26745-4.14461a41.01,41.01,0,0,0,8.51314-16.60116Zm-17.29922,13.4436a34.42481,34.42481,0,0,1-4.30845-3.61857l.88277-9.825H102.531A33.01224,33.01224,0,0,1,94.93985,111.39049Z"/>
+              <path d="M64,5.34663A57.70263,57.70263,0,0,0,44.60032,8.69294L47.396,15.576A50.52175,50.52175,0,0,1,110.3604,83.43274h1.88489a11.45044,11.45044,0,0,1,5.54882,1.44017,57.48148,57.48148,0,0,0,4.1722-21.56C121.96631,33.09586,95.95881,5.34663,64,5.34663Z"/>
+              <path d="M13.44629,63.96606a49.68,49.68,0,0,1,1.48253-12.11422A11.85157,11.85157,0,0,1,7.855,49.52211,57.99058,57.99058,0,0,0,64,121.93231c.78359,0,1.58843-.02118,2.372-.06342a11.3226,11.3226,0,0,1,2.58388-6.07832,10.19268,10.19268,0,0,1,1.84253-1.73669A48.0252,48.0252,0,0,1,64,114.51977,50.60267,50.60267,0,0,1,13.44629,63.96606Z"/>
+            </svg>
+          </button>
+          <ul id="language-options" class="floating-menu drop-down hidden">
+            
+            
+            
+                <li class="lang-option-inactive">
+              <a href="/">
+                English
+              </a>
+            </li>
+              
+            
+            
+            
+            <li class="lang-option-active">简体中文</li>
+              
+            
+          </ul>
+
+          <!-- button for search -->
+          <button id="search-button" class="toggle-button" type="button">
+            <svg class="icon" fill="none" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24">
+              <path d="M 9 2 C 5.1458514 2 2 5.1458514 2 9 C 2 12.854149 5.1458514 16 9 16 C 10.747998 16 12.345009 15.348024 13.574219 14.28125 L 14 14.707031 L 14 16 L 20 22 L 22 20 L 16 14 L 14.707031 14 L 14.28125 13.574219 C 15.348024 12.345009 16 10.747998 16 9 C 16 5.1458514 12.854149 2 9 2 z M 9 4 C 11.773268 4 14 6.2267316 14 9 C 14 11.773268 11.773268 14 9 14 C 6.2267316 14 4 11.773268 4 9 C 4 6.2267316 6.2267316 4 9 4 z"/>
+            </svg>
+          </button>
+          <!-- </button> -->
+          <div id="search-bar" class="drop-down hidden">
+            <input type="text" id="search-input" placeholder="Search blog posts...">
+            <ul id="search-results">
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <!-- placeholder div for fixed position header -->
+  <div id="header-placeholder"></div>
+</div>
+
+<script src="/assets/js/header.js"></script>
+
+
+    <link rel="stylesheet" href="/assets/css/content.css">
+<script src="/assets/js/content.js"></script>
+
+<div class="content-container">
+  <div id="content" class="main-width">
+    <link rel="stylesheet" href="/assets/css/archive.css">
+
+<div class="archive">
+  
+  
+  <h1 id="archive-title" class="archive-title">首页</h1>
+  <link rel="stylesheet" href="/assets/css/paginator.css" />
+
+<link rel="stylesheet" href="/assets/css/post-meta.css" />
+
+<link rel="stylesheet" href="/assets/css/home.css" />
+
+<h2 class="archive-subtitle">最新文章</h2>
+
+<div class="pagination">
+  
+  
+    <div class="post-item">
+      <article class="archive-item">
+        <h2 class="archive-item-title">
+          
+            <a href="/zh/2022/01/16/database-hikaricp.html" rel="permalink">HikariCP源码分析</a>
+          
+        </h2>
+        
+
+
+<p class="post-meta">
+  <!-- post create time -->
+  <span>
+    <svg class="icon" viewBox="0 0 36 36" version="1.1" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <title>create-date</title>
+        <path class="clr-i-outline clr-i-outline-path-1" d="M32.25,6H29V8h3V30H4V8H7V6H3.75A1.78,1.78,0,0,0,2,7.81V30.19A1.78,1.78,0,0,0,3.75,32h28.5A1.78,1.78,0,0,0,34,30.19V7.81A1.78,1.78,0,0,0,32.25,6Z"></path><rect class="clr-i-outline clr-i-outline-path-2" x="8" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-3" x="14" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-4" x="20" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-5" x="26" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-6" x="8" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-7" x="14" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-8" x="20" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-9" x="26" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-10" x="8" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-11" x="14" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-12" x="20" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-13" x="26" y="24" width="2" height="2"></rect><path class="clr-i-outline clr-i-outline-path-14" d="M10,10a1,1,0,0,0,1-1V3A1,1,0,0,0,9,3V9A1,1,0,0,0,10,10Z"></path><path class="clr-i-outline clr-i-outline-path-15" d="M26,10a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V9A1,1,0,0,0,26,10Z"></path><rect class="clr-i-outline clr-i-outline-path-16" x="13" y="6" width="10" height="2"></rect>
+        <rect x="0" y="0" width="36" height="36" fill-opacity="0" />
+    </svg>
+    
+    <time datetime="">2022-01-16</time>
+  </span>
+  
+</p>
+
+        <p class="archive-item-excerpt" itemprop="description">HikariCP是一个快速，简单可靠的JDBC连接池，SpringBoot2.0开始默认使用该数据库连接池。JDBC连接池是一种管理多连接请求的机制，换句话说，它对数据库连接进行缓存，促使连接的重用。
+</p>
+      </article>
+    </div>
+  
+    <div class="post-item">
+      <article class="archive-item">
+        <h2 class="archive-item-title">
+          
+            <a href="/zh/2021/10/03/ssh-remote-login-and-tcp-forwarding.html" rel="permalink">SSH远程登录和TCP端口转发</a>
+          
+        </h2>
+        
+
+
+<p class="post-meta">
+  <!-- post create time -->
+  <span>
+    <svg class="icon" viewBox="0 0 36 36" version="1.1" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <title>create-date</title>
+        <path class="clr-i-outline clr-i-outline-path-1" d="M32.25,6H29V8h3V30H4V8H7V6H3.75A1.78,1.78,0,0,0,2,7.81V30.19A1.78,1.78,0,0,0,3.75,32h28.5A1.78,1.78,0,0,0,34,30.19V7.81A1.78,1.78,0,0,0,32.25,6Z"></path><rect class="clr-i-outline clr-i-outline-path-2" x="8" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-3" x="14" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-4" x="20" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-5" x="26" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-6" x="8" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-7" x="14" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-8" x="20" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-9" x="26" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-10" x="8" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-11" x="14" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-12" x="20" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-13" x="26" y="24" width="2" height="2"></rect><path class="clr-i-outline clr-i-outline-path-14" d="M10,10a1,1,0,0,0,1-1V3A1,1,0,0,0,9,3V9A1,1,0,0,0,10,10Z"></path><path class="clr-i-outline clr-i-outline-path-15" d="M26,10a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V9A1,1,0,0,0,26,10Z"></path><rect class="clr-i-outline clr-i-outline-path-16" x="13" y="6" width="10" height="2"></rect>
+        <rect x="0" y="0" width="36" height="36" fill-opacity="0" />
+    </svg>
+    
+    <time datetime="">2021-10-03</time>
+  </span>
+  
+</p>
+
+        <p class="archive-item-excerpt" itemprop="description">Security Shell Protocal (SSH)是一种网络协议，旨在为不安全的网络提供安全的加密通信。SSH应用基于客户端/服务端架构，SSH客户端用于登录远程机器（SSH服务器）并在远程机器上执行命令。
+最常见的SSH应用包括：
+
+  SSH远程登录
+  任意TCP端口转发
+
+</p>
+      </article>
+    </div>
+  
+    <div class="post-item">
+      <article class="archive-item">
+        <h2 class="archive-item-title">
+          
+            <a href="/zh/2021/09/18/hive-serial-2-hive-data-definition-operation.html" rel="permalink">Hive系列(2) - Hive数据定义操作(DDL)</a>
+          
+        </h2>
+        
+
+
+<p class="post-meta">
+  <!-- post create time -->
+  <span>
+    <svg class="icon" viewBox="0 0 36 36" version="1.1" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <title>create-date</title>
+        <path class="clr-i-outline clr-i-outline-path-1" d="M32.25,6H29V8h3V30H4V8H7V6H3.75A1.78,1.78,0,0,0,2,7.81V30.19A1.78,1.78,0,0,0,3.75,32h28.5A1.78,1.78,0,0,0,34,30.19V7.81A1.78,1.78,0,0,0,32.25,6Z"></path><rect class="clr-i-outline clr-i-outline-path-2" x="8" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-3" x="14" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-4" x="20" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-5" x="26" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-6" x="8" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-7" x="14" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-8" x="20" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-9" x="26" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-10" x="8" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-11" x="14" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-12" x="20" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-13" x="26" y="24" width="2" height="2"></rect><path class="clr-i-outline clr-i-outline-path-14" d="M10,10a1,1,0,0,0,1-1V3A1,1,0,0,0,9,3V9A1,1,0,0,0,10,10Z"></path><path class="clr-i-outline clr-i-outline-path-15" d="M26,10a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V9A1,1,0,0,0,26,10Z"></path><rect class="clr-i-outline clr-i-outline-path-16" x="13" y="6" width="10" height="2"></rect>
+        <rect x="0" y="0" width="36" height="36" fill-opacity="0" />
+    </svg>
+    
+    <time datetime="">2021-09-18</time>
+  </span>
+  
+</p>
+
+        <p class="archive-item-excerpt" itemprop="description">Hive DDL语句主要和database/schema, table/view, function等有关，全部的操作可以查看Hive Confluence, 包括：
+
+  CREATE DATABASE/SCHEMA, TABLE, VIEW, FUNCTION, INDEX
+  DROP DATABASE/S...</p>
+      </article>
+    </div>
+  
+    <div class="post-item">
+      <article class="archive-item">
+        <h2 class="archive-item-title">
+          
+            <a href="/zh/2021/09/11/hive-serial-1-introduction-to-hive.html" rel="permalink">Hive系列(1) - Hive介绍</a>
+          
+        </h2>
+        
+
+
+<p class="post-meta">
+  <!-- post create time -->
+  <span>
+    <svg class="icon" viewBox="0 0 36 36" version="1.1" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <title>create-date</title>
+        <path class="clr-i-outline clr-i-outline-path-1" d="M32.25,6H29V8h3V30H4V8H7V6H3.75A1.78,1.78,0,0,0,2,7.81V30.19A1.78,1.78,0,0,0,3.75,32h28.5A1.78,1.78,0,0,0,34,30.19V7.81A1.78,1.78,0,0,0,32.25,6Z"></path><rect class="clr-i-outline clr-i-outline-path-2" x="8" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-3" x="14" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-4" x="20" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-5" x="26" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-6" x="8" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-7" x="14" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-8" x="20" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-9" x="26" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-10" x="8" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-11" x="14" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-12" x="20" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-13" x="26" y="24" width="2" height="2"></rect><path class="clr-i-outline clr-i-outline-path-14" d="M10,10a1,1,0,0,0,1-1V3A1,1,0,0,0,9,3V9A1,1,0,0,0,10,10Z"></path><path class="clr-i-outline clr-i-outline-path-15" d="M26,10a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V9A1,1,0,0,0,26,10Z"></path><rect class="clr-i-outline clr-i-outline-path-16" x="13" y="6" width="10" height="2"></rect>
+        <rect x="0" y="0" width="36" height="36" fill-opacity="0" />
+    </svg>
+    
+    <time datetime="">2021-09-11</time>
+  </span>
+  
+</p>
+
+        <p class="archive-item-excerpt" itemprop="description">Apache Hive™是一个基于Apache Hadoop™的数据仓库设施，便于读、写和管理分布式存储中的大型数据集,并通过SQL语法查询数据。
+</p>
+      </article>
+    </div>
+  
+    <div class="post-item">
+      <article class="archive-item">
+        <h2 class="archive-item-title">
+          
+            <a href="/zh/2021/08/03/find-walk-a-file-hierarchy.html" rel="permalink">find - 遍历文件结构</a>
+          
+        </h2>
+        
+
+
+<p class="post-meta">
+  <!-- post create time -->
+  <span>
+    <svg class="icon" viewBox="0 0 36 36" version="1.1" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <title>create-date</title>
+        <path class="clr-i-outline clr-i-outline-path-1" d="M32.25,6H29V8h3V30H4V8H7V6H3.75A1.78,1.78,0,0,0,2,7.81V30.19A1.78,1.78,0,0,0,3.75,32h28.5A1.78,1.78,0,0,0,34,30.19V7.81A1.78,1.78,0,0,0,32.25,6Z"></path><rect class="clr-i-outline clr-i-outline-path-2" x="8" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-3" x="14" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-4" x="20" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-5" x="26" y="14" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-6" x="8" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-7" x="14" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-8" x="20" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-9" x="26" y="19" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-10" x="8" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-11" x="14" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-12" x="20" y="24" width="2" height="2"></rect><rect class="clr-i-outline clr-i-outline-path-13" x="26" y="24" width="2" height="2"></rect><path class="clr-i-outline clr-i-outline-path-14" d="M10,10a1,1,0,0,0,1-1V3A1,1,0,0,0,9,3V9A1,1,0,0,0,10,10Z"></path><path class="clr-i-outline clr-i-outline-path-15" d="M26,10a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V9A1,1,0,0,0,26,10Z"></path><rect class="clr-i-outline clr-i-outline-path-16" x="13" y="6" width="10" height="2"></rect>
+        <rect x="0" y="0" width="36" height="36" fill-opacity="0" />
+    </svg>
+    
+    <time datetime="">2021-08-03</time>
+  </span>
+  
+</p>
+
+        <p class="archive-item-excerpt" itemprop="description">find程序递归向下遍历每个路径的目录树，对树中每个文件计算表达式。基本用法：
+find [options] path [expression]
+
+</p>
+      </article>
+    </div>
+  
+</div>
+
+
+</div>
+
+  </div>
+  <div class="back-to-top-wrapper">
+    <a href="#content" class="back-to-top-link">
+      <svg class="icon" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M27.6801 48.7299L31.1601 52.11L34.4801 51.57L35.9801 48.2L36.8401 33.68L40.0001 31.2099L45.8901 35.5499L49.7001 35.93L52.3801 33.52L51.5701 30.2999L33.7301 12.2H29.6601L11.8801 30.95L12.4601 34.91L17.1801 36.4599L22.9601 31.11L27.4601 32.7099L27.6801 48.7299Z" fill="#78B9EB"/>
+      <path d="M32 2.75C26.2149 2.75 20.5597 4.46548 15.7496 7.67951C10.9394 10.8935 7.1904 15.4618 4.97654 20.8065C2.76267 26.1512 2.18343 32.0324 3.31204 37.7064C4.44066 43.3803 7.22645 48.5922 11.3171 52.6829C15.4078 56.7736 20.6197 59.5594 26.2936 60.688C31.9676 61.8166 37.8488 61.2373 43.1935 59.0235C48.5382 56.8096 53.1065 53.0606 56.3205 48.2504C59.5345 43.4403 61.25 37.7851 61.25 32C61.2421 24.2449 58.1578 16.8096 52.6741 11.3259C47.1904 5.84218 39.7552 2.75794 32 2.75V2.75ZM32 58.75C26.7094 58.75 21.5375 57.1811 17.1385 54.2418C12.7395 51.3025 9.31088 47.1247 7.28624 42.2368C5.26159 37.3489 4.73185 31.9703 5.76401 26.7813C6.79616 21.5923 9.34385 16.8259 13.0849 13.0849C16.826 9.34384 21.5924 6.79615 26.7813 5.76399C31.9703 4.73184 37.3489 5.26158 42.2368 7.28622C47.1247 9.31087 51.3025 12.7395 54.2418 17.1385C57.1812 21.5375 58.75 26.7093 58.75 32C58.7421 39.0921 55.9212 45.8915 50.9063 50.9063C45.8915 55.9212 39.0921 58.7421 32 58.75V58.75Z" fill="#006DF0"/>
+      <path d="M51.6999 28.3301L35.6999 12.3301C35.2131 11.842 34.6349 11.4549 33.9983 11.1907C33.3616 10.9265 32.6792 10.7905 31.9899 10.7905C31.3006 10.7905 30.6181 10.9265 29.9815 11.1907C29.3449 11.4549 28.7667 11.842 28.2799 12.3301L12.2799 28.3301C11.2959 29.3153 10.7437 30.6511 10.7446 32.0436C10.7451 32.7331 10.8814 33.4157 11.1456 34.0525C11.4099 34.6893 11.797 35.2679 12.2849 35.7551C12.7728 36.2423 13.3518 36.6286 13.989 36.892C14.6261 37.1554 15.309 37.2908 15.9984 37.2903C17.3909 37.2894 18.7259 36.7353 19.7099 35.7501L22.0399 33.4201C22.4251 33.0367 22.9152 32.776 23.4483 32.671C23.9815 32.5659 24.5339 32.6212 25.0357 32.8299C25.5375 33.0385 25.9662 33.3911 26.2677 33.8432C26.5693 34.2953 26.7301 34.8266 26.7299 35.3701V48.0001C26.7299 49.3924 27.283 50.7278 28.2676 51.7124C29.2522 52.6969 30.5875 53.2501 31.9799 53.2501C33.3723 53.2501 34.7076 52.6969 35.6922 51.7124C36.6768 50.7278 37.2299 49.3924 37.2299 48.0001V35.3701C37.2297 34.8266 37.3905 34.2953 37.6921 33.8432C37.9936 33.3911 38.4223 33.0385 38.9241 32.8299C39.4259 32.6212 39.9783 32.5659 40.5114 32.671C41.0446 32.776 41.5347 33.0367 41.9199 33.4201L44.2499 35.7501C45.2339 36.7353 46.5689 37.2894 47.9614 37.2903C49.3538 37.2913 50.6896 36.739 51.6749 35.7551C52.6602 34.7711 53.2142 33.436 53.2152 32.0436C53.2161 30.6511 52.6639 29.3153 51.6799 28.3301H51.6999ZM49.9299 34.0001C49.4036 34.5114 48.6987 34.7974 47.9649 34.7974C47.2311 34.7974 46.5262 34.5114 45.9999 34.0001L43.6699 31.6701C42.9373 30.9223 41.9979 30.4106 40.9723 30.2007C39.9467 29.9908 38.8817 30.0923 37.9143 30.4922C36.9468 30.8921 36.121 31.5721 35.5428 32.4448C34.9647 33.3176 34.6607 34.3432 34.6699 35.3901V48.0001C34.6699 48.7294 34.3802 49.4289 33.8644 49.9446C33.3487 50.4603 32.6492 50.7501 31.9199 50.7501C31.1906 50.7501 30.4911 50.4603 29.9754 49.9446C29.4596 49.4289 29.1699 48.7294 29.1699 48.0001V35.3701C29.1891 34.3369 28.897 33.3219 28.3316 32.457C27.7663 31.592 26.9539 30.9171 25.9999 30.5201C25.3669 30.2511 24.6876 30.1085 23.9999 30.1001C22.6163 30.1086 21.2927 30.6661 20.3199 31.6501L17.9999 34.0001C17.4841 34.5159 16.7844 34.8057 16.0549 34.8057C15.3254 34.8057 14.6257 34.5159 14.1099 34.0001C13.5941 33.4842 13.3043 32.7846 13.3043 32.0551C13.3043 31.3255 13.5941 30.6259 14.1099 30.1101L30.1099 14.1101C30.6314 13.6089 31.3266 13.3291 32.0499 13.3291C32.7732 13.3291 33.4684 13.6089 33.9899 14.1101L49.9899 30.1101C50.4956 30.635 50.7731 31.3386 50.7618 32.0674C50.7506 32.7962 50.4515 33.491 49.9299 34.0001Z" fill="#006DF0"/>
+      </svg>
+    </a>
+  </div>
+</div>
+
+
+    <link rel="stylesheet" href="/assets/css/footer.css">
+<script src="/assets/js/footer.js"></script>
+
+<div class="footer-container">
+  <footer id="footer" class="main-width">
+    <div id="visitor-line">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 83.78" style="enable-background:new 0 0 122.88 83.78" xml:space="preserve">
+        <g>
+          <path d="M95.73,10.81c10.53,7.09,19.6,17.37,26.48,29.86l0.67,1.22l-0.67,1.21c-6.88,12.49-15.96,22.77-26.48,29.86 C85.46,79.88,73.8,83.78,61.44,83.78c-12.36,0-24.02-3.9-34.28-10.81C16.62,65.87,7.55,55.59,0.67,43.1L0,41.89l0.67-1.22 c6.88-12.49,15.95-22.77,26.48-29.86C37.42,3.9,49.08,0,61.44,0C73.8,0,85.45,3.9,95.73,10.81L95.73,10.81z M60.79,22.17l4.08,0.39 c-1.45,2.18-2.31,4.82-2.31,7.67c0,7.48,5.86,13.54,13.1,13.54c2.32,0,4.5-0.62,6.39-1.72c0.03,0.47,0.05,0.94,0.05,1.42 c0,11.77-9.54,21.31-21.31,21.31c-11.77,0-21.31-9.54-21.31-21.31C39.48,31.71,49.02,22.17,60.79,22.17L60.79,22.17L60.79,22.17z M109,41.89c-5.5-9.66-12.61-17.6-20.79-23.11c-8.05-5.42-17.15-8.48-26.77-8.48c-9.61,0-18.71,3.06-26.76,8.48 c-8.18,5.51-15.29,13.45-20.8,23.11c5.5,9.66,12.62,17.6,20.8,23.1c8.05,5.42,17.15,8.48,26.76,8.48c9.62,0,18.71-3.06,26.77-8.48 C96.39,59.49,103.5,51.55,109,41.89L109,41.89z"/>
+        </g>
+      </svg>
+      <span id="busuanzi_container_site_pv">Views: <span id="busuanzi_value_site_pv"></span></span>
+      <span class="span-divider">|</span>
+      <svg class="icon" style="height: 1.3em;" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24">
+        <path d="M18,19v-2c0.45-0.223,1.737-1.755,1.872-2.952c0.354-0.027,0.91-0.352,1.074-1.635c0.088-0.689-0.262-1.076-0.474-1.198 c0,0,0.528-1.003,0.528-2.214c0-2.428-0.953-4.5-3-4.5c0,0-0.711-1.5-3-1.5c-4.242,0-6,2.721-6,6c0,1.104,0.528,2.214,0.528,2.214 c-0.212,0.122-0.562,0.51-0.474,1.198c0.164,1.283,0.72,1.608,1.074,1.635C10.263,15.245,11.55,16.777,12,17v2c-1,3-9,1-9,8h24 C27,20,19,22,18,19z"/>
+      </svg>
+      <span id="busuanzi_container_site_uv">Visitors: <span id="busuanzi_value_site_uv"></span></span>
+    </div>
+
+    <div id="powered-list">
+      Powered by
+      <ul>
+        <li>
+          <a href="https://jekyllrb.com">Jekyll</a>
+        </li>
+        <li>
+          <a href="https://leo3418.github.io/">leo3418</a>
+        </li>
+        <li>
+          <a href="https://github.com/untra/polyglot/">polyglot</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+    </div>
+  </footer>
+</div>
+
+  </body>
+</html>

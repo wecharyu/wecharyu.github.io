@@ -1,0 +1,120 @@
+@import "monokai.css";
+/* main.css for the basic html style */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: unset;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui;
+  min-height: 100vh;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+}
+
+article, aside, details, figcaption, figure, footer, header, hgroup, main, nav, section {
+  display: block;
+}
+
+ol, ul, li {
+  list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 2em 0 0.5em;
+  line-height: 1.2em;
+  font-weight: bold;
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 1.5em;
+}
+
+h2 {
+  font-size: 1.25em;
+}
+
+h3 {
+  font-size: 1.125em;
+}
+
+h4 {
+  font-size: 1.0625em;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  border: 0;
+  vertical-align: middle;
+}
+
+table {
+  border-left:1px solid #000000;border-top:1px solid #000000;
+  width: 100%;
+  word-wrap:break-word; word-break:break-all;
+}
+
+table th, td {
+  text-align:center;
+  border-right:1px solid #000000;border-bottom:1px solid #000000;
+}
+
+td.left {
+  text-align: left;
+}
+
+.clear {
+  clear: both;
+  height: 1px;
+  width: 100%;
+  overflow: hidden;
+  margin-top: -1px;
+}
+
+a {
+  color: #000;
+  text-decoration: none;
+  word-wrap:break-word;
+}
+
+a:hover {
+  color: #F00;
+}
+
+.main-width {
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+.icon {
+  display: inline-block;
+  fill: currentColor;
+  width: 1em;
+  height: 1.1em;
+  position: relative;
+  vertical-align: text-bottom;
+}
+
+.span-divider {
+  margin: 0 1em;
+}
